@@ -1,0 +1,10 @@
+Unstaged changes after reset:
+M	app/src/main/AndroidManifest.xml
+M	app/src/main/java/com/ss/todolist/MainActivity.java
+D	app/src/main/java/com/ss/todolist/ToDoActivity.java
+M	app/src/main/java/com/ss/todolist/adapter/ItemAdapter.java
+M	app/src/main/res/layout/activity_main.xml
+D	app/src/main/res/layout/activity_todo.xml
+M	app/src/main/res/layout/fragment_todo_item.xml
+M	app/src/main/res/layout/fragment_todo_list.xml
+M	app/src/main/res/values/strings.xml

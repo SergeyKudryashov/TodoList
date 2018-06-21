@@ -48,6 +48,13 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public ItemAdapter(Context context) {
         mContext = context;
+        for (int i = 0; i < 10; i++) {
+            TodoItem item = new TodoItem();
+            item.setTitle("Item " + i);
+            item.setDescription("Description " + 1);
+            item.setCalendar(Calendar.getInstance());
+            mItems.add(item);
+        }
     }
 
     @NonNull

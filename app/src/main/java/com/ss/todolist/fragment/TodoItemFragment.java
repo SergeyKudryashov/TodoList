@@ -1,17 +1,19 @@
-package com.ss.todolist;
+package com.ss.todolist.fragment;
 
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
+import android.app.Fragment;
 import android.app.TimePickerDialog;
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -21,13 +23,19 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.ss.todolist.MainActivity;
+import com.ss.todolist.R;
 import com.ss.todolist.model.TodoItem;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class ToDoActivity extends AppCompatActivity {
+import static com.ss.todolist.MainActivity.*;
+import static com.ss.todolist.fragment.TodoListFragment.*;
+
+public class TodoItemFragment extends Fragment {
+
 
     private final int COUNTER_MAX_VALUE = 3;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
@@ -66,39 +74,41 @@ public class ToDoActivity extends AppCompatActivity {
         }
     };
 
-
-    @SuppressLint("ClickableViewAccessibility")
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_todo);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowTitleEnabled(false);
+            actionBar.setDisplayShowHomeEnabled(true);
+            actionBar.setDisplayHomeAsUpEnabled(true);
         }
+        // TODO Replace fab button visibility change algorithm
+        ((MainActivity) getActivity()).setFloatButtonVisibility(View.GONE);
+    }
 
-        mTitleInputLayout = findViewById(R.id.title_input_layout);
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_todo_item, container, false);
+        mTitleInputLayout = view.findViewById(R.id.title_input_layout);
 
-        mTitleEditText = findViewById(R.id.title_edit_text);
-        mDescriptionEditText = findViewById(R.id.description_edit_text);
-        mDateEditText = findViewById(R.id.date_edit_text);
-        mTimeEditText = findViewById(R.id.time_edit_text);
+        mTitleEditText = view.findViewById(R.id.title_edit_text);
+        mDescriptionEditText = view.findViewById(R.id.description_edit_text);
+        mDateEditText = view.findViewById(R.id.date_edit_text);
+        mTimeEditText = view.findViewById(R.id.time_edit_text);
 
-        mReminderCheckBox = findViewById(R.id.reminder_check_box);
-        mRepeatCheckBox = findViewById(R.id.repeat_check_box);
+        mReminderCheckBox = view.findViewById(R.id.reminder_check_box);
+        mRepeatCheckBox = view.findViewById(R.id.repeat_check_box);
 
-        mRepeatRadioGroup = findViewById(R.id.repeat_radio_group);
+        mRepeatRadioGroup = view.findViewById(R.id.repeat_radio_group);
 
-        mSaveEditButton = findViewById(R.id.edit_save_button);
-        mIncCountButton = findViewById(R.id.inc_count_button);
-        mDecCountButton = findViewById(R.id.dec_count_button);
+        mSaveEditButton = view.findViewById(R.id.edit_save_button);
+        mIncCountButton = view.findViewById(R.id.inc_count_button);
+        mDecCountButton = view.findViewById(R.id.dec_count_button);
 
-        mCounterTextView = findViewById(R.id.counter_text_view);
-        mPriorityTextView = findViewById(R.id.priority_text_view);
+        mCounterTextView = view.findViewById(R.id.counter_text_view);
+        mPriorityTextView = view.findViewById(R.id.priority_text_view);
 
         mTitleEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         mDescriptionEditText.setInputType(InputType.TYPE_CLASS_TEXT |
@@ -111,10 +121,15 @@ public class ToDoActivity extends AppCompatActivity {
 
         mCalendar = Calendar.getInstance();
 
-        switch (getIntent().getIntExtra("requestCode", 0)) {
+        return view;
+    }
 
-            case MainActivity.ADD_NEW_TODO_ITEM_REQUEST_CODE:
-                mSaveEditButton.setText("save");
+    @SuppressLint("ClickableViewAccessibility")
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        switch (getArguments().getInt("request_code")) {
+            case ADD_NEW_TODO_ITEM_REQUEST_CODE: {
+                mSaveEditButton.setText(getString(R.string.save_button));
 
                 mCalendar.set(Calendar.DAY_OF_MONTH, mCalendar.get(Calendar.DAY_OF_MONTH) + 1);
                 mCalendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -122,14 +137,13 @@ public class ToDoActivity extends AppCompatActivity {
 
                 mDateEditText.setText(dateFormat.format(mCalendar.getTime()));
                 mTimeEditText.setText(timeFormat.format(mCalendar.getTime()));
+            }
+            break;
+            case EDIT_TODO_ITEM_REQUEST_CODE: {
+                mSaveEditButton.setText(getString(R.string.edit_button));
 
-                break;
-
-            case MainActivity.EDIT_TODO_ITEM_REQUEST_CODE:
-                mSaveEditButton.setText("edit");
-
-                id = getIntent().getIntExtra("id", -1);
-                mItem = (TodoItem) getIntent().getSerializableExtra("item");
+                id = getArguments().getInt("id");
+                mItem = (TodoItem) getArguments().getSerializable("item");
 
                 mCalendar = mItem.getCalendar();
                 mCounter = mItem.getPriority();
@@ -144,11 +158,11 @@ public class ToDoActivity extends AppCompatActivity {
                     mRepeatRadioGroup.check(mItem.getRepeatType());
                 }
                 mCounterTextView.setText(String.valueOf(mCounter));
-
                 isFieldsEnabled(false);
-
-                break;
+            }
+            break;
         }
+
 
         mIncCountButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -185,7 +199,7 @@ public class ToDoActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    new DatePickerDialog(ToDoActivity.this, dateSetListener,
+                    new DatePickerDialog(getActivity(), dateSetListener,
                             mCalendar.get(Calendar.YEAR),
                             mCalendar.get(Calendar.MONTH),
                             mCalendar.get(Calendar.DAY_OF_MONTH)).show();
@@ -198,7 +212,7 @@ public class ToDoActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    new TimePickerDialog(ToDoActivity.this, timeSetListener,
+                    new TimePickerDialog(getActivity(), timeSetListener,
                             mCalendar.get(Calendar.HOUR_OF_DAY),
                             mCalendar.get(Calendar.MINUTE), true).show();
                 }
@@ -206,65 +220,22 @@ public class ToDoActivity extends AppCompatActivity {
             }
         });
 
+
         mSaveEditButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switch (getIntent().getIntExtra("requestCode", 0)) {
-                    case MainActivity.ADD_NEW_TODO_ITEM_REQUEST_CODE: {
+                switch (getArguments().getInt("request_code")) {
+                    case ADD_NEW_TODO_ITEM_REQUEST_CODE: {
                         addTodoItem();
                     }
                     break;
-                    case MainActivity.EDIT_TODO_ITEM_REQUEST_CODE: {
+                    case EDIT_TODO_ITEM_REQUEST_CODE: {
                         editTodoItem();
                     }
                     break;
                 }
             }
         });
-    }
-
-    private void addTodoItem() {
-        if (!isEmptyInputLayout()) {
-            TodoItem item = new TodoItem();
-            item.setTitle(mTitleEditText.getText().toString().trim());
-            item.setDescription(mDescriptionEditText.getText().toString().trim());
-            item.setCalendar(mCalendar);
-            item.setReminder(mReminderCheckBox.isChecked());
-            item.setRepeat(mRepeatCheckBox.isChecked());
-            if (mRepeatCheckBox.isChecked()) {
-                item.setRepeatType(mRepeatRadioGroup.getCheckedRadioButtonId());
-            }
-            item.setPriority(mCounter);
-
-            setResult(RESULT_OK, new Intent().putExtra("item", item));
-            finish();
-        }
-    }
-
-    private void editTodoItem() {
-        if (!isEditable) {
-            mSaveEditButton.setText("save");
-            isEditable = true;
-            isFieldsEnabled(true);
-            return;
-        }
-
-
-        mItem.setTitle(mTitleEditText.getText().toString().trim());
-        mItem.setDescription(mDescriptionEditText.getText().toString().trim());
-        mItem.setCalendar(mCalendar);
-        mItem.setReminder(mReminderCheckBox.isChecked());
-        mItem.setRepeat(mRepeatCheckBox.isChecked());
-        if (mRepeatCheckBox.isChecked()) {
-            mItem.setRepeatType(mRepeatRadioGroup.getCheckedRadioButtonId());
-        }
-        mItem.setPriority(mCounter);
-
-        Intent data = new Intent();
-        data.putExtra("id", id);
-        data.putExtra("item", mItem);
-        setResult(RESULT_OK, data);
-        finish();
     }
 
     private void isFieldsEnabled(boolean flag) {
@@ -295,13 +266,52 @@ public class ToDoActivity extends AppCompatActivity {
         return false;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            setResult(RESULT_CANCELED);
-            finish();
+    private void addTodoItem() {
+        if (!isEmptyInputLayout()) {
+            TodoItem item = new TodoItem();
+            item.setTitle(mTitleEditText.getText().toString().trim());
+            item.setDescription(mDescriptionEditText.getText().toString().trim());
+            item.setCalendar(mCalendar);
+            item.setReminder(mReminderCheckBox.isChecked());
+            item.setRepeat(mRepeatCheckBox.isChecked());
+            if (mRepeatCheckBox.isChecked()) {
+                item.setRepeatType(mRepeatRadioGroup.getCheckedRadioButtonId());
+            }
+            item.setPriority(mCounter);
+
+//            setResult(RESULT_OK, new Intent().putExtra("item", item));
+//            finish();
+            // TODO Add new item
+        }
+    }
+
+    private void editTodoItem() {
+        if (!isEditable) {
+            mSaveEditButton.setText(getString(R.string.save_button));
+            isEditable = true;
+            isFieldsEnabled(true);
+            return;
         }
 
-        return super.onOptionsItemSelected(item);
+
+        mItem.setTitle(mTitleEditText.getText().toString().trim());
+        mItem.setDescription(mDescriptionEditText.getText().toString().trim());
+        mItem.setCalendar(mCalendar);
+        mItem.setReminder(mReminderCheckBox.isChecked());
+        mItem.setRepeat(mRepeatCheckBox.isChecked());
+        if (mRepeatCheckBox.isChecked()) {
+            mItem.setRepeatType(mRepeatRadioGroup.getCheckedRadioButtonId());
+        }
+        mItem.setPriority(mCounter);
+//
+//        Intent data = new Intent();
+//        data.putExtra("id", id);
+//        data.putExtra("item", mItem);
+//
+//
+//        setResult(RESULT_OK, data);
+//        finish();
+        // TODO Edit the item
     }
+
 }

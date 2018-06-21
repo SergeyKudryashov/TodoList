@@ -3,4 +3,6 @@
     <string name="action_delete">Delete</string>
     <string name="title_activity_to_do">ToDoActivity</string>
     <string name="empty_title_error">Enter a title</string>
+    <string name="save_button">save</string>
+    <string name="edit_button">save</string>
 </resources>
