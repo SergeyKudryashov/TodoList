@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.ss.todolist.MainActivity;
 import com.ss.todolist.R;
+import com.ss.todolist.fragment.TodoListFragment;
 import com.ss.todolist.model.Item;
 import com.ss.todolist.model.MonthItem;
 import com.ss.todolist.model.TodoItem;
@@ -53,7 +54,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             item.setTitle("Item " + i);
             item.setDescription("Description " + 1);
             item.setCalendar(Calendar.getInstance());
-            mItems.add(item);
+            addItem(item);
         }
     }
 
@@ -292,11 +293,11 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                             public void onDestroyActionMode(ActionMode mode) {
                                 mActionMode = null;
                                 mSelectedItems.clear();
-                                ((MainActivity) itemView.getContext()).setFloatButtonVisibility(View.VISIBLE);
+//                                ((TodoListFragment) mContext).setFloatButtonVisibility(View.VISIBLE);
                                 notifyDataSetChanged();
                             }
                         });
-                        ((MainActivity) itemView.getContext()).setFloatButtonVisibility(View.GONE);
+//                        ((MainActivity) itemView.getContext()).setFloatButtonVisibility(View.GONE);
                         selectItem(getAdapterPosition(), true);
                         notifyDataSetChanged();
                     }

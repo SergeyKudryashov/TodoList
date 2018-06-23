@@ -36,7 +36,6 @@ import static com.ss.todolist.fragment.TodoListFragment.*;
 
 public class TodoItemFragment extends Fragment {
 
-
     private final int COUNTER_MAX_VALUE = 3;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
     private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
@@ -83,8 +82,6 @@ public class TodoItemFragment extends Fragment {
             actionBar.setDisplayShowHomeEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        // TODO Replace fab button visibility change algorithm
-        ((MainActivity) getActivity()).setFloatButtonVisibility(View.GONE);
     }
 
     @Nullable
@@ -281,7 +278,7 @@ public class TodoItemFragment extends Fragment {
 
 //            setResult(RESULT_OK, new Intent().putExtra("item", item));
 //            finish();
-            // TODO Add new item
+            // TODO Save button
         }
     }
 
