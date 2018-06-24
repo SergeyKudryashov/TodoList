@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.ss.todolist.fragment.TodoItemFragment;
 import com.ss.todolist.fragment.TodoListFragment;
@@ -25,24 +24,40 @@ public class MainActivity extends AppCompatActivity {
         mFragmentManager = getFragmentManager();
 
         TodoListFragment todoListFragment = new TodoListFragment();
-        final TodoItemFragment todoItemFragment = new TodoItemFragment();
-
-        Bundle args = new Bundle();
-        args.putInt("request_code", TodoListFragment.ADD_NEW_TODO_ITEM_REQUEST_CODE);
-        todoItemFragment.setArguments(args);
-
         todoListFragment.setOnAddButtonClickListener(new TodoListFragment.OnAddButtonClickListener() {
             @Override
             public void onAddButtonClick() {
+                Bundle args = new Bundle();
+                args.putInt("request_code", TodoListFragment.ADD_NEW_TODO_ITEM_REQUEST_CODE);
+
+                TodoItemFragment todoItemFragment = new TodoItemFragment();
+                todoItemFragment.setArguments(args);
+
                 mFragmentManager.beginTransaction()
                         .replace(R.id.fragment_container, todoItemFragment)
                         .addToBackStack("tag1")
                         .commit();
             }
         });
+        todoListFragment.setOnItemClickListener(new TodoListFragment.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                Bundle args = new Bundle();
+                args.putInt("request_code", TodoListFragment.EDIT_TODO_ITEM_REQUEST_CODE);
+                args.putInt("position", position);
+
+                TodoItemFragment fragment = new TodoItemFragment();
+                fragment.setArguments(args);
+
+                getFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, fragment)
+                        .addToBackStack("tag1")
+                        .commit();
+            }
+        });
 
         mFragmentManager.beginTransaction()
-                .add(R.id.fragment_container,todoListFragment)
+                .add(R.id.fragment_container, todoListFragment)
                 .commit();
     }
 

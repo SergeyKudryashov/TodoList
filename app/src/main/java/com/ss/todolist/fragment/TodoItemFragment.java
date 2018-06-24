@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.Fragment;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
@@ -11,9 +12,13 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -22,19 +27,19 @@ import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
-import com.ss.todolist.MainActivity;
 import com.ss.todolist.R;
+import com.ss.todolist.TodoItems;
 import com.ss.todolist.model.TodoItem;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-import static com.ss.todolist.MainActivity.*;
-import static com.ss.todolist.fragment.TodoListFragment.*;
-
 public class TodoItemFragment extends Fragment {
+    private static final int ADD_NEW_TODO_ITEM_REQUEST_CODE = 1;
+    private static final int EDIT_TODO_ITEM_REQUEST_CODE = 2;
 
     private final int COUNTER_MAX_VALUE = 3;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
@@ -44,11 +49,11 @@ public class TodoItemFragment extends Fragment {
     private EditText mTitleEditText, mDescriptionEditText, mDateEditText, mTimeEditText;
     private CheckBox mReminderCheckBox, mRepeatCheckBox;
     private RadioGroup mRepeatRadioGroup;
-    private Button mSaveEditButton, mIncCountButton, mDecCountButton;
+    private Button mIncCountButton, mDecCountButton;
     private TextView mCounterTextView, mPriorityTextView;
 
     private TodoItem mItem;
-    private int mCounter = 0, id;
+    private int mCounter = 0, position;
     private Calendar mCalendar;
     private boolean isEditable = false;
 
@@ -76,6 +81,7 @@ public class TodoItemFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayShowTitleEnabled(false);
@@ -100,7 +106,6 @@ public class TodoItemFragment extends Fragment {
 
         mRepeatRadioGroup = view.findViewById(R.id.repeat_radio_group);
 
-        mSaveEditButton = view.findViewById(R.id.edit_save_button);
         mIncCountButton = view.findViewById(R.id.inc_count_button);
         mDecCountButton = view.findViewById(R.id.dec_count_button);
 
@@ -126,21 +131,19 @@ public class TodoItemFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         switch (getArguments().getInt("request_code")) {
             case ADD_NEW_TODO_ITEM_REQUEST_CODE: {
-                mSaveEditButton.setText(getString(R.string.save_button));
-
                 mCalendar.set(Calendar.DAY_OF_MONTH, mCalendar.get(Calendar.DAY_OF_MONTH) + 1);
                 mCalendar.set(Calendar.HOUR_OF_DAY, 0);
                 mCalendar.set(Calendar.MINUTE, 0);
 
                 mDateEditText.setText(dateFormat.format(mCalendar.getTime()));
                 mTimeEditText.setText(timeFormat.format(mCalendar.getTime()));
+
+                isEditable = true;
             }
             break;
             case EDIT_TODO_ITEM_REQUEST_CODE: {
-                mSaveEditButton.setText(getString(R.string.edit_button));
-
-                id = getArguments().getInt("id");
-                mItem = (TodoItem) getArguments().getSerializable("item");
+                position = getArguments().getInt("position");
+                mItem = (TodoItem) TodoItems.getInstance().getItem(position);
 
                 mCalendar = mItem.getCalendar();
                 mCounter = mItem.getPriority();
@@ -216,11 +219,24 @@ public class TodoItemFragment extends Fragment {
                 return false;
             }
         });
+    }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_item, menu);
 
-        mSaveEditButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        if (!isEditable) {
+            menu.findItem(R.id.action_save).setIcon(R.drawable.ic_action_edit);
+        } else {
+            menu.findItem(R.id.action_save).setIcon(R.drawable.ic_action_save);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_save:
                 switch (getArguments().getInt("request_code")) {
                     case ADD_NEW_TODO_ITEM_REQUEST_CODE: {
                         addTodoItem();
@@ -231,8 +247,10 @@ public class TodoItemFragment extends Fragment {
                     }
                     break;
                 }
-            }
-        });
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void isFieldsEnabled(boolean flag) {
@@ -276,16 +294,15 @@ public class TodoItemFragment extends Fragment {
             }
             item.setPriority(mCounter);
 
-//            setResult(RESULT_OK, new Intent().putExtra("item", item));
-//            finish();
-            // TODO Save button
+            TodoItems.getInstance().addItem(item);
+            getFragmentManager().popBackStack();
         }
     }
 
     private void editTodoItem() {
         if (!isEditable) {
-            mSaveEditButton.setText(getString(R.string.save_button));
             isEditable = true;
+            getActivity().invalidateOptionsMenu();
             isFieldsEnabled(true);
             return;
         }
@@ -300,15 +317,9 @@ public class TodoItemFragment extends Fragment {
             mItem.setRepeatType(mRepeatRadioGroup.getCheckedRadioButtonId());
         }
         mItem.setPriority(mCounter);
-//
-//        Intent data = new Intent();
-//        data.putExtra("id", id);
-//        data.putExtra("item", mItem);
-//
-//
-//        setResult(RESULT_OK, data);
-//        finish();
-        // TODO Edit the item
+
+        TodoItems.getInstance().editItem(position, mItem);
+        getFragmentManager().popBackStack();
     }
 
 }

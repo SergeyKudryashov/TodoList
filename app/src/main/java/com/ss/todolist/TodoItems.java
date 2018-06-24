@@ -15,7 +15,7 @@ import static com.ss.todolist.model.MonthItem.MONTH_ITEM_TYPE;
 
 public class TodoItems {
 
-    private List<Item> mItems;
+    private final List<Item> mItems;
     private static TodoItems mInstance;
 
     public static TodoItems getInstance() {
@@ -52,7 +52,7 @@ public class TodoItems {
     }
 
     public void editItem(int position, TodoItem item) {
-        mItems.set(position, item);
+//        mItems.set(position, item);
         if (mItems.get(position - 1).getType() == MONTH_ITEM_TYPE) {
             if (position < mItems.size() - 1 && mItems.get(position + 1).getType() != mItems.get(position).getType()) {
                 mItems.remove(position - 1);

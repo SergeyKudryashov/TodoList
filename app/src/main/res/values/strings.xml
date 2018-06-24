@@ -1,8 +1,7 @@
 <resources>
     <string name="app_name">TODO List</string>
     <string name="action_delete">Delete</string>
-    <string name="title_activity_to_do">ToDoActivity</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_save">Save</string>
     <string name="empty_title_error">Enter a title</string>
-    <string name="save_button">save</string>
-    <string name="edit_button">edit</string>
 </resources>

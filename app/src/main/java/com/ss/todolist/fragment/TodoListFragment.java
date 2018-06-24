@@ -1,6 +1,7 @@
 package com.ss.todolist.fragment;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -11,18 +12,19 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 
 import com.ss.todolist.R;
+import com.ss.todolist.TodoItems;
 import com.ss.todolist.adapter.ItemAdapter;
-import com.ss.todolist.model.TodoItem;
 
 public class TodoListFragment extends Fragment {
     public static final int ADD_NEW_TODO_ITEM_REQUEST_CODE = 1;
     public static final int EDIT_TODO_ITEM_REQUEST_CODE = 2;
 
-    private RecyclerView mRecyclerView;
     private ItemAdapter mItemAdapter;
     private FloatingActionButton mFab;
+    private InputMethodManager imm;
 
     private OnItemClickListener mOnItemClickListener;
     private OnAddButtonClickListener mOnAddButtonClickListener;
@@ -35,29 +37,37 @@ public class TodoListFragment extends Fragment {
         void onAddButtonClick();
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_todo_list, container, false);
-        mRecyclerView = view.findViewById(R.id.recycler_view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mItemAdapter = new ItemAdapter(getActivity());
-        mRecyclerView.setAdapter(mItemAdapter);
+        RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mItemAdapter = new ItemAdapter(getActivity(), TodoItems.getInstance().getItems());
+        recyclerView.setAdapter(mItemAdapter);
 
         mItemAdapter.setOnItemClickListener(new ItemAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
-                Bundle args = new Bundle();
-                args.putInt("request_code", EDIT_TODO_ITEM_REQUEST_CODE);
-                args.putInt("id", position);
-                args.putSerializable("item", (TodoItem) mItemAdapter.getItem(position));
-                TodoItemFragment fragment = new TodoItemFragment();
-                fragment.setArguments(args);
-                getFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, fragment)
-                        .addToBackStack(null)
-                        .commit();
+                if (mOnItemClickListener == null)
+                    return;
+
+                mOnItemClickListener.onItemClick(position);
                 setFloatButtonVisibility(View.GONE);
+            }
+        });
+
+        mItemAdapter.setOnItemLongClickListener(new ItemAdapter.OnItemLongClickListener() {
+            @Override
+            public void onItemLongClick(int visibility) {
+                setFloatButtonVisibility(visibility);
             }
         });
 
@@ -78,7 +88,10 @@ public class TodoListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        setFloatButtonVisibility(View.VISIBLE);
+        View currentView = getActivity().getCurrentFocus();
+        if (currentView != null) {
+            imm.hideSoftInputFromWindow(currentView.getWindowToken(), 0);
+        }
 
         ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         if (actionBar != null) {
@@ -86,9 +99,12 @@ public class TodoListFragment extends Fragment {
             actionBar.setDisplayShowHomeEnabled(false);
             actionBar.setDisplayHomeAsUpEnabled(false);
         }
+        if (mItemAdapter != null)
+            mItemAdapter.notifyDataSetChanged();
+
     }
 
-    public void setFloatButtonVisibility(int visibility) {
+    private void setFloatButtonVisibility(int visibility) {
         mFab.setVisibility(visibility);
     }
 
@@ -100,21 +116,3 @@ public class TodoListFragment extends Fragment {
         mOnAddButtonClickListener = listener;
     }
 }
-
-
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if (resultCode == RESULT_OK) {
-//            switch (requestCode) {
-//                case ADD_NEW_TODO_ITEM_REQUEST_CODE:
-//                    mItemAdapter.addItem((TodoItem) data.getSerializableExtra("item"));
-//                    break;
-//                case EDIT_TODO_ITEM_REQUEST_CODE:
-//                    mItemAdapter.editItem(data.getIntExtra("id", -1),
-//                            (TodoItem) data.getSerializableExtra("item"));
-//                    break;
-//            }
-//        }
-//    }
-
-
