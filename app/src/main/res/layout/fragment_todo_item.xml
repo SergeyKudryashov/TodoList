@@ -121,16 +121,19 @@
             tools:visibility="gone">
 
             <RadioButton
+                android:id="@+id/daily"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Daily" />
 
             <RadioButton
+                android:id="@+id/weekly"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Weekly" />
 
             <RadioButton
+                android:id="@+id/monthly"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Monthly" />

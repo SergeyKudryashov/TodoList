@@ -53,7 +53,9 @@ public class TodoItemFragment extends Fragment {
     private TextView mCounterTextView, mPriorityTextView;
 
     private TodoItem mItem;
-    private int mCounter = 0, position;
+    private int position;
+
+    private int mCounter = 0;
     private Calendar mCalendar;
     private boolean isEditable = false;
 
@@ -81,15 +83,13 @@ public class TodoItemFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false);
-            actionBar.setDisplayShowHomeEnabled(true);
-            actionBar.setDisplayHomeAsUpEnabled(true);
+        if (savedInstanceState != null) {
+            mCounter = savedInstanceState.getInt("counter");
+            isEditable = savedInstanceState.getBoolean("isEditable");
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -118,51 +118,6 @@ public class TodoItemFragment extends Fragment {
                 InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         mDateEditText.setInputType(InputType.TYPE_NULL);
         mTimeEditText.setInputType(InputType.TYPE_NULL);
-
-        mCounterTextView.setText(String.valueOf(mCounter));
-
-        mCalendar = Calendar.getInstance();
-
-        return view;
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        switch (getArguments().getInt("request_code")) {
-            case ADD_NEW_TODO_ITEM_REQUEST_CODE: {
-                mCalendar.set(Calendar.DAY_OF_MONTH, mCalendar.get(Calendar.DAY_OF_MONTH) + 1);
-                mCalendar.set(Calendar.HOUR_OF_DAY, 0);
-                mCalendar.set(Calendar.MINUTE, 0);
-
-                mDateEditText.setText(dateFormat.format(mCalendar.getTime()));
-                mTimeEditText.setText(timeFormat.format(mCalendar.getTime()));
-
-                isEditable = true;
-            }
-            break;
-            case EDIT_TODO_ITEM_REQUEST_CODE: {
-                position = getArguments().getInt("position");
-                mItem = (TodoItem) TodoItems.getInstance().getItem(position);
-
-                mCalendar = mItem.getCalendar();
-                mCounter = mItem.getPriority();
-
-                mTitleEditText.setText(mItem.getTitle());
-                mDescriptionEditText.setText(mItem.getDescription());
-                mDateEditText.setText(dateFormat.format(mCalendar.getTime()));
-                mTimeEditText.setText(timeFormat.format(mCalendar.getTime()));
-                mReminderCheckBox.setChecked(mItem.isReminder());
-                mRepeatCheckBox.setChecked(mItem.isRepeat());
-                if (mItem.isRepeat()) {
-                    mRepeatRadioGroup.check(mItem.getRepeatType());
-                }
-                mCounterTextView.setText(String.valueOf(mCounter));
-                isFieldsEnabled(false);
-            }
-            break;
-        }
-
 
         mIncCountButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -219,6 +174,78 @@ public class TodoItemFragment extends Fragment {
                 return false;
             }
         });
+
+        return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setHasOptionsMenu(true);
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowTitleEnabled(false);
+            actionBar.setDisplayShowHomeEnabled(true);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        switch (getArguments().getInt("request_code")) {
+            case ADD_NEW_TODO_ITEM_REQUEST_CODE: {
+                if (savedInstanceState == null) {
+                    mCalendar = Calendar.getInstance();
+                    mCalendar.set(Calendar.DAY_OF_MONTH, mCalendar.get(Calendar.DAY_OF_MONTH) + 1);
+                    mCalendar.set(Calendar.HOUR_OF_DAY, 0);
+                    mCalendar.set(Calendar.MINUTE, 0);
+                } else {
+                    mCalendar = (Calendar) savedInstanceState.getSerializable("calendar");
+                }
+
+                mDateEditText.setText(dateFormat.format(mCalendar.getTime()));
+                mTimeEditText.setText(timeFormat.format(mCalendar.getTime()));
+                mCounterTextView.setText(String.valueOf(mCounter));
+
+                isEditable = true;
+            }
+            break;
+            case EDIT_TODO_ITEM_REQUEST_CODE: {
+                position = getArguments().getInt("position");
+                mItem = (TodoItem) TodoItems.getInstance().getItem(position);
+
+                if (savedInstanceState == null) {
+                    mCalendar = mItem.getCalendar();
+                    mCounter = mItem.getPriority();
+                } else {
+                    mCalendar = (Calendar) savedInstanceState.getSerializable("calendar");
+                }
+
+                mTitleEditText.setText(mItem.getTitle());
+                mDescriptionEditText.setText(mItem.getDescription());
+                mDateEditText.setText(dateFormat.format(mCalendar.getTime()));
+                mTimeEditText.setText(timeFormat.format(mCalendar.getTime()));
+                mReminderCheckBox.setChecked(mItem.isReminder());
+                mRepeatCheckBox.setChecked(mItem.isRepeat());
+                if (mItem.isRepeat()) {
+                    mRepeatRadioGroup.check(mItem.getRepeatType());
+                }
+                mCounterTextView.setText(String.valueOf(mCounter));
+
+                isFieldsEnabled(isEditable);
+            }
+            break;
+        }
+
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("counter", mCounter);
+        outState.putSerializable("calendar", mCalendar);
+        outState.putBoolean("isEditable", isEditable);
     }
 
     @Override
@@ -303,7 +330,7 @@ public class TodoItemFragment extends Fragment {
         if (!isEditable) {
             isEditable = true;
             getActivity().invalidateOptionsMenu();
-            isFieldsEnabled(true);
+            isFieldsEnabled(isEditable);
             return;
         }
 
