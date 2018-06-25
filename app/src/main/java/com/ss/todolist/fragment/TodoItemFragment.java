@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.Fragment;
 import android.app.TimePickerDialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
@@ -18,7 +17,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -27,7 +25,6 @@ import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import com.ss.todolist.R;
 import com.ss.todolist.TodoItems;
@@ -38,8 +35,10 @@ import java.util.Calendar;
 import java.util.Locale;
 
 public class TodoItemFragment extends Fragment {
-    private static final int ADD_NEW_TODO_ITEM_REQUEST_CODE = 1;
-    private static final int EDIT_TODO_ITEM_REQUEST_CODE = 2;
+    public static final int ADD_NEW_TODO_ITEM_REQUEST_CODE = 1;
+    public static final int EDIT_TODO_ITEM_REQUEST_CODE = 2;
+    public static final String REQUEST_CODE_ARG = "request_code";
+    public static final String POSITION_ARG = "position";
 
     private final int COUNTER_MAX_VALUE = 3;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
@@ -88,6 +87,7 @@ public class TodoItemFragment extends Fragment {
             isEditable = savedInstanceState.getBoolean("isEditable");
         }
     }
+
 
     @SuppressLint("ClickableViewAccessibility")
     @Nullable
@@ -193,7 +193,7 @@ public class TodoItemFragment extends Fragment {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        switch (getArguments().getInt("request_code")) {
+        switch (getArguments().getInt(REQUEST_CODE_ARG)) {
             case ADD_NEW_TODO_ITEM_REQUEST_CODE: {
                 if (savedInstanceState == null) {
                     mCalendar = Calendar.getInstance();
@@ -212,7 +212,7 @@ public class TodoItemFragment extends Fragment {
             }
             break;
             case EDIT_TODO_ITEM_REQUEST_CODE: {
-                position = getArguments().getInt("position");
+                position = getArguments().getInt(POSITION_ARG);
                 mItem = (TodoItem) TodoItems.getInstance().getItem(position);
 
                 if (savedInstanceState == null) {
@@ -264,7 +264,7 @@ public class TodoItemFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_save:
-                switch (getArguments().getInt("request_code")) {
+                switch (getArguments().getInt(REQUEST_CODE_ARG)) {
                     case ADD_NEW_TODO_ITEM_REQUEST_CODE: {
                         addTodoItem();
                     }
@@ -334,19 +334,20 @@ public class TodoItemFragment extends Fragment {
             return;
         }
 
+        if (!isEmptyInputLayout()) {
+            mItem.setTitle(mTitleEditText.getText().toString().trim());
+            mItem.setDescription(mDescriptionEditText.getText().toString().trim());
+            mItem.setCalendar(mCalendar);
+            mItem.setReminder(mReminderCheckBox.isChecked());
+            mItem.setRepeat(mRepeatCheckBox.isChecked());
+            if (mRepeatCheckBox.isChecked()) {
+                mItem.setRepeatType(mRepeatRadioGroup.getCheckedRadioButtonId());
+            }
+            mItem.setPriority(mCounter);
 
-        mItem.setTitle(mTitleEditText.getText().toString().trim());
-        mItem.setDescription(mDescriptionEditText.getText().toString().trim());
-        mItem.setCalendar(mCalendar);
-        mItem.setReminder(mReminderCheckBox.isChecked());
-        mItem.setRepeat(mRepeatCheckBox.isChecked());
-        if (mRepeatCheckBox.isChecked()) {
-            mItem.setRepeatType(mRepeatRadioGroup.getCheckedRadioButtonId());
+            TodoItems.getInstance().editItem(position, mItem);
+            getFragmentManager().popBackStack();
         }
-        mItem.setPriority(mCounter);
-
-        TodoItems.getInstance().editItem(position, mItem);
-        getFragmentManager().popBackStack();
     }
 
 }

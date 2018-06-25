@@ -10,6 +10,7 @@ import com.ss.todolist.fragment.TodoItemFragment;
 import com.ss.todolist.fragment.TodoListFragment;
 
 public class MainActivity extends AppCompatActivity {
+    private final String SAVED_FRAGMENT_KEY = "savedListFragment";
 
     private FragmentManager mFragmentManager;
 
@@ -22,16 +23,17 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         mFragmentManager = getFragmentManager();
+        TodoListFragment todoListFragment;
         if (mFragmentManager.findFragmentById(R.id.fragment_container) == null) {
-            TodoListFragment todoListFragment = new TodoListFragment();
-            setListeners(todoListFragment);
+            todoListFragment = new TodoListFragment();
 
             mFragmentManager.beginTransaction()
                     .add(R.id.fragment_container, todoListFragment, "tag1")
                     .commit();
         } else {
-            setListeners((TodoListFragment) mFragmentManager.getFragment(savedInstanceState, "savedListFragment"));
+            todoListFragment = (TodoListFragment) mFragmentManager.getFragment(savedInstanceState, SAVED_FRAGMENT_KEY);
         }
+        setListeners(todoListFragment);
     }
 
     private void setListeners(TodoListFragment fragment) {
@@ -39,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onAddButtonClick() {
                         Bundle args = new Bundle();
-                        args.putInt("request_code", TodoListFragment.ADD_NEW_TODO_ITEM_REQUEST_CODE);
+                        args.putInt(TodoItemFragment.REQUEST_CODE_ARG, TodoItemFragment.ADD_NEW_TODO_ITEM_REQUEST_CODE);
 
                         TodoItemFragment todoItemFragment = new TodoItemFragment();
                         todoItemFragment.setArguments(args);
@@ -54,14 +56,14 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onItemClick(int position) {
                         Bundle args = new Bundle();
-                        args.putInt("request_code", TodoListFragment.EDIT_TODO_ITEM_REQUEST_CODE);
-                        args.putInt("position", position);
+                        args.putInt(TodoItemFragment.REQUEST_CODE_ARG, TodoItemFragment.EDIT_TODO_ITEM_REQUEST_CODE);
+                        args.putInt(TodoItemFragment.POSITION_ARG, position);
 
-                        TodoItemFragment fragment = new TodoItemFragment();
-                        fragment.setArguments(args);
+                        TodoItemFragment todoItemFragment = new TodoItemFragment();
+                        todoItemFragment.setArguments(args);
 
                         getFragmentManager().beginTransaction()
-                                .replace(R.id.fragment_container, fragment, "tag2")
+                                .replace(R.id.fragment_container, todoItemFragment, "tag2")
                                 .addToBackStack(null)
                                 .commit();
                     }
@@ -80,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mFragmentManager.putFragment(outState, "savedListFragment",
+        mFragmentManager.putFragment(outState, SAVED_FRAGMENT_KEY,
                 mFragmentManager.findFragmentByTag("tag1"));
     }
 }

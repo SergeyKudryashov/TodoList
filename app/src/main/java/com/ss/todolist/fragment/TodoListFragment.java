@@ -19,8 +19,6 @@ import com.ss.todolist.TodoItems;
 import com.ss.todolist.adapter.ItemAdapter;
 
 public class TodoListFragment extends Fragment {
-    public static final int ADD_NEW_TODO_ITEM_REQUEST_CODE = 1;
-    public static final int EDIT_TODO_ITEM_REQUEST_CODE = 2;
 
     private ItemAdapter mItemAdapter;
     private FloatingActionButton mFab;

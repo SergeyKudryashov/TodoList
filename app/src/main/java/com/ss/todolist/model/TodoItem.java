@@ -6,10 +6,13 @@ import java.util.Calendar;
 public class TodoItem implements Serializable, Item {
     public static final int TODO_ITEM_TYPE = 1;
 
-    private String title, description;
+    private String title;
+    private String description;
     private Calendar calendar;
-    private boolean reminder, repeat;
-    private int repeatType, priority;
+    private boolean reminder;
+    private boolean repeat;
+    private int repeatType;
+    private int priority;
 
     public String getTitle() {
         return title;
