@@ -2,77 +2,130 @@ package com.ss.todolist.model;
 
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.UUID;
 
 public class TodoItem implements Serializable, Item {
     public static final int TODO_ITEM_TYPE = 1;
+    public static final int PRIORITY_MAX = 3;
+    public static final int PRIORITY_MIN = 0;
 
-    private String title;
-    private String description;
-    private Calendar calendar;
-    private boolean reminder;
-    private boolean repeat;
-    private int repeatType;
-    private int priority;
+    private UUID mId;
+    private String mTitle;
+    private String mDescription;
+    private Calendar mCalendar;
+    private boolean mReminder;
+    private boolean mRepeat;
+    private int mRepeatType;
+    private int mPriority;
+
+    public TodoItem() {
+        mId = UUID.randomUUID();
+    }
+
+    public UUID getId() {
+        return mId;
+    }
 
     public String getTitle() {
-        return title;
+        return mTitle;
     }
 
     public String getDescription() {
-        return description;
+        return mDescription;
     }
 
     @Override
     public Calendar getCalendar() {
-        return calendar;
+        return mCalendar;
     }
 
     public boolean isReminder() {
-        return reminder;
+        return mReminder;
     }
 
     public boolean isRepeat() {
-        return repeat;
+        return mRepeat;
     }
 
     public int getRepeatType() {
-        return repeatType;
+        return mRepeatType;
     }
 
     public int getPriority() {
-        return priority;
+        return mPriority;
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        mTitle = title;
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        mDescription = description;
     }
 
     public void setCalendar(Calendar calendar) {
-        this.calendar = calendar;
+        mCalendar = calendar;
     }
 
     public void setReminder(boolean reminder) {
-        this.reminder = reminder;
+        mReminder = reminder;
     }
 
     public void setRepeat(boolean repeat) {
-        this.repeat = repeat;
+        mRepeat = repeat;
     }
 
     public void setRepeatType(int repeatType) {
-        this.repeatType = repeatType;
+        mRepeatType = repeatType;
     }
 
     public void setPriority(int priority) {
-        this.priority = priority;
+        if (priority < PRIORITY_MIN || priority > PRIORITY_MAX) {
+            throw new IllegalArgumentException("Priority should be in range of " + PRIORITY_MIN
+                    + " - " + PRIORITY_MAX);
+        }
+        mPriority = priority;
     }
 
     @Override
     public int getType() {
         return TODO_ITEM_TYPE;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+
+        result = prime * result + ((mId == null) ? 0 : mId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (this.getClass() != obj.getClass())
+            return false;
+        TodoItem other = (TodoItem) obj;
+        if (mId == null) {
+            return other.mId == null;
+        } else {
+            return mId.equals(other.mId);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return  "[" + mId + "]:"
+                + mTitle + "|"
+                + mDescription + "|"
+                + mCalendar + "|"
+                + mReminder + "|"
+                + mRepeat + "|"
+                + mRepeatType + "|"
+                + mPriority;
     }
 }

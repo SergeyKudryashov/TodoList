@@ -30,6 +30,7 @@ import com.ss.todolist.R;
 import com.ss.todolist.TodoItems;
 import com.ss.todolist.model.TodoItem;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -40,9 +41,10 @@ public class TodoItemFragment extends Fragment {
     public static final String REQUEST_CODE_ARG = "request_code";
     public static final String POSITION_ARG = "position";
 
-    private final int COUNTER_MAX_VALUE = 3;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
     private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+
+    private OnFragmentInteractionListener mListener;
 
     private TextInputLayout mTitleInputLayout;
     private EditText mTitleEditText, mDescriptionEditText, mDateEditText, mTimeEditText;
@@ -52,7 +54,7 @@ public class TodoItemFragment extends Fragment {
     private TextView mCounterTextView, mPriorityTextView;
 
     private TodoItem mItem;
-    private int position;
+    private int mPosition;
 
     private int mCounter = 0;
     private Calendar mCalendar;
@@ -79,21 +81,63 @@ public class TodoItemFragment extends Fragment {
         }
     };
 
+    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.inc_count_button:
+                    mCounter = Math.min(++mCounter, TodoItem.PRIORITY_MAX);
+                    mCounterTextView.setText(String.valueOf(mCounter));
+                    break;
+                case R.id.dec_count_button:
+                    mCounter = Math.max(--mCounter, TodoItem.PRIORITY_MIN);
+                    mCounterTextView.setText(String.valueOf(mCounter));
+                    break;
+            }
+        }
+    };
+
+    public TodoItemFragment() {
+
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             mCounter = savedInstanceState.getInt("counter");
             isEditable = savedInstanceState.getBoolean("isEditable");
+            mListener = (OnFragmentInteractionListener) savedInstanceState.getSerializable("listener");
         }
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setHasOptionsMenu(true);
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowTitleEnabled(false);
+            actionBar.setDisplayShowHomeEnabled(true);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_todo_item, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        init(view);
+        update(savedInstanceState);
     }
 
 
     @SuppressLint("ClickableViewAccessibility")
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_todo_item, container, false);
+    private void init(View view) {
         mTitleInputLayout = view.findViewById(R.id.title_input_layout);
 
         mTitleEditText = view.findViewById(R.id.title_edit_text);
@@ -119,25 +163,8 @@ public class TodoItemFragment extends Fragment {
         mDateEditText.setInputType(InputType.TYPE_NULL);
         mTimeEditText.setInputType(InputType.TYPE_NULL);
 
-        mIncCountButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mCounter < COUNTER_MAX_VALUE) {
-                    mCounter++;
-                    mCounterTextView.setText(String.valueOf(mCounter));
-                }
-            }
-        });
-
-        mDecCountButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mCounter > 0) {
-                    mCounter--;
-                    mCounterTextView.setText(String.valueOf(mCounter));
-                }
-            }
-        });
+        mIncCountButton.setOnClickListener(mOnClickListener);
+        mDecCountButton.setOnClickListener(mOnClickListener);
 
         mRepeatCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -174,27 +201,13 @@ public class TodoItemFragment extends Fragment {
                 return false;
             }
         });
-
-        return view;
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        setHasOptionsMenu(true);
-        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false);
-            actionBar.setDisplayShowHomeEnabled(true);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    private void update(Bundle savedInstanceState) {
         switch (getArguments().getInt(REQUEST_CODE_ARG)) {
             case ADD_NEW_TODO_ITEM_REQUEST_CODE: {
+                mItem = new TodoItem();
+
                 if (savedInstanceState == null) {
                     mCalendar = Calendar.getInstance();
                     mCalendar.set(Calendar.DAY_OF_MONTH, mCalendar.get(Calendar.DAY_OF_MONTH) + 1);
@@ -212,8 +225,8 @@ public class TodoItemFragment extends Fragment {
             }
             break;
             case EDIT_TODO_ITEM_REQUEST_CODE: {
-                position = getArguments().getInt(POSITION_ARG);
-                mItem = (TodoItem) TodoItems.getInstance().getItem(position);
+                mPosition = getArguments().getInt(POSITION_ARG);
+                mItem = (TodoItem) TodoItems.getInstance().getItem(mPosition);
 
                 if (savedInstanceState == null) {
                     mCalendar = mItem.getCalendar();
@@ -237,7 +250,6 @@ public class TodoItemFragment extends Fragment {
             }
             break;
         }
-
     }
 
     @Override
@@ -246,6 +258,7 @@ public class TodoItemFragment extends Fragment {
         outState.putInt("counter", mCounter);
         outState.putSerializable("calendar", mCalendar);
         outState.putBoolean("isEditable", isEditable);
+        outState.putSerializable("listener", mListener);
     }
 
     @Override
@@ -309,21 +322,23 @@ public class TodoItemFragment extends Fragment {
     }
 
     private void addTodoItem() {
-        if (!isEmptyInputLayout()) {
-            TodoItem item = new TodoItem();
-            item.setTitle(mTitleEditText.getText().toString().trim());
-            item.setDescription(mDescriptionEditText.getText().toString().trim());
-            item.setCalendar(mCalendar);
-            item.setReminder(mReminderCheckBox.isChecked());
-            item.setRepeat(mRepeatCheckBox.isChecked());
-            if (mRepeatCheckBox.isChecked()) {
-                item.setRepeatType(mRepeatRadioGroup.getCheckedRadioButtonId());
-            }
-            item.setPriority(mCounter);
+        if (isEmptyInputLayout())
+            return;
 
-            TodoItems.getInstance().addItem(item);
-            getFragmentManager().popBackStack();
+        mItem.setTitle(mTitleEditText.getText().toString().trim());
+        mItem.setDescription(mDescriptionEditText.getText().toString().trim());
+        mItem.setCalendar(mCalendar);
+        mItem.setReminder(mReminderCheckBox.isChecked());
+        mItem.setRepeat(mRepeatCheckBox.isChecked());
+        if (mRepeatCheckBox.isChecked()) {
+            mItem.setRepeatType(mRepeatRadioGroup.getCheckedRadioButtonId());
         }
+        mItem.setPriority(mCounter);
+
+        if (mListener == null)
+            return;
+        mListener.onAddItem(mItem);
+        getFragmentManager().popBackStack();
     }
 
     private void editTodoItem() {
@@ -334,20 +349,31 @@ public class TodoItemFragment extends Fragment {
             return;
         }
 
-        if (!isEmptyInputLayout()) {
-            mItem.setTitle(mTitleEditText.getText().toString().trim());
-            mItem.setDescription(mDescriptionEditText.getText().toString().trim());
-            mItem.setCalendar(mCalendar);
-            mItem.setReminder(mReminderCheckBox.isChecked());
-            mItem.setRepeat(mRepeatCheckBox.isChecked());
-            if (mRepeatCheckBox.isChecked()) {
-                mItem.setRepeatType(mRepeatRadioGroup.getCheckedRadioButtonId());
-            }
-            mItem.setPriority(mCounter);
+        if (isEmptyInputLayout())
+            return;
 
-            TodoItems.getInstance().editItem(position, mItem);
-            getFragmentManager().popBackStack();
+        mItem.setTitle(mTitleEditText.getText().toString().trim());
+        mItem.setDescription(mDescriptionEditText.getText().toString().trim());
+        mItem.setCalendar(mCalendar);
+        mItem.setReminder(mReminderCheckBox.isChecked());
+        mItem.setRepeat(mRepeatCheckBox.isChecked());
+        if (mRepeatCheckBox.isChecked()) {
+            mItem.setRepeatType(mRepeatRadioGroup.getCheckedRadioButtonId());
         }
+        mItem.setPriority(mCounter);
+
+        if (mListener == null)
+            return;
+        mListener.onEditItem(mPosition, mItem);
+        getFragmentManager().popBackStack();
     }
 
+    public void setOnInteractionListener(OnFragmentInteractionListener onInteractionListener) {
+        mListener = onInteractionListener;
+    }
+
+    public interface OnFragmentInteractionListener extends Serializable {
+        void onAddItem(TodoItem item);
+        void onEditItem(int position, TodoItem item);
+    }
 }
