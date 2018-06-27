@@ -5,8 +5,8 @@ import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,37 +17,27 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.ss.todolist.R;
-import com.ss.todolist.TodoItems;
-import com.ss.todolist.model.Item;
-import com.ss.todolist.model.MonthItem;
-import com.ss.todolist.model.TodoItem;
+import com.ss.todolist.model.*;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.TreeSet;
 
-import static com.ss.todolist.model.MonthItem.*;
-import static com.ss.todolist.model.TodoItem.*;
+import static com.ss.todolist.model.MonthItem.MONTH_ITEM_TYPE;
 
 public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private TreeSet<Integer> mSelectedItems = new TreeSet<>();
-    private List<Item> mItems;
+    private OnItemClickListener mListener;
+
     private Context mContext;
     private ActionMode mActionMode;
 
-    private OnItemClickListener mClickListener;
-    private OnItemLongClickListener mLongClickListener;
-
-    public interface OnItemClickListener {
-        void onItemClick(int position);
-    }
-
-    public interface OnItemLongClickListener {
-        void onItemLongClick(int visibility);
-    }
-
+    private List<Item> mItems;
+    private TreeSet<Integer> mSelectedItems = new TreeSet<>();
 
     public ItemAdapter(Context context, List<Item> list) {
         mContext = context;
@@ -59,12 +49,12 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view;
         switch (viewType) {
-            case MONTH_ITEM_TYPE: {
+            case MonthItem.MONTH_ITEM_TYPE: {
                 view = LayoutInflater.from(mContext).inflate(R.layout.month_item_view, parent, false);
                 return new MonthItemViewHolder(view);
 
             }
-            case TODO_ITEM_TYPE: {
+            case TodoItem.TODO_ITEM_TYPE: {
                 view = LayoutInflater.from(mContext).inflate(R.layout.todo_item, parent, false);
                 return new TodoItemViewHolder(view);
             }
@@ -77,11 +67,11 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         switch (holder.getItemViewType()) {
-            case TODO_ITEM_TYPE: {
-                ((TodoItemViewHolder) holder).bind((TodoItem) mItems.get(position), mClickListener);
+            case TodoItem.TODO_ITEM_TYPE: {
+                ((TodoItemViewHolder) holder).bind((TodoItem) mItems.get(position), mListener);
             }
             break;
-            case MONTH_ITEM_TYPE: {
+            case MonthItem.MONTH_ITEM_TYPE: {
                 ((MonthItemViewHolder) holder).bind((MonthItem) mItems.get(position));
             }
             break;
@@ -96,21 +86,90 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public int getItemViewType(int position) {
         switch (mItems.get(position).getType()) {
-            case MONTH_ITEM_TYPE:
-                return MONTH_ITEM_TYPE;
-            case TODO_ITEM_TYPE:
-                return TODO_ITEM_TYPE;
+            case MonthItem.MONTH_ITEM_TYPE:
+                return MonthItem.MONTH_ITEM_TYPE;
+            case TodoItem.TODO_ITEM_TYPE:
+                return TodoItem.TODO_ITEM_TYPE;
             default:
                 return -1;
         }
     }
 
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        mClickListener = listener;
+    public void addItem(TodoItem item) {
+        mItems.add(item);
+        sort();
+        int i = mItems.indexOf(item);
+        Calendar monthCalendar = Calendar.getInstance();
+        monthCalendar.set(item.getCalendar().get(Calendar.YEAR),
+                item.getCalendar().get(Calendar.MONTH), 1, 0, 0);
+        if (i == 0) {
+            mItems.add(0, new MonthItem(monthCalendar));
+        } else if (mItems.get(i - 1).getCalendar().get(Calendar.MONTH) != item.getCalendar().get(Calendar.MONTH)) {
+            mItems.add(i, new MonthItem(monthCalendar));
+        }
     }
 
-    public void setOnItemLongClickListener(OnItemLongClickListener listener) {
-        mLongClickListener = listener;
+    public void editItem(int position, TodoItem item) {
+        if (mItems.get(position - 1).getType() == MONTH_ITEM_TYPE) {
+            if (position < mItems.size() - 1 && mItems.get(position + 1).getType() != mItems.get(position).getType()) {
+                mItems.remove(position - 1);
+            } else if (position == mItems.size() - 1) {
+                mItems.remove(position - 1);
+            }
+        }
+        sort();
+        int i = mItems.indexOf(item);
+        Calendar monthCalendar = Calendar.getInstance();
+        monthCalendar.set(item.getCalendar().get(Calendar.YEAR),
+                item.getCalendar().get(Calendar.MONTH), 1, 0, 0);
+        if (i == 0) {
+            mItems.add(0, new MonthItem(monthCalendar));
+        } else if (mItems.get(i - 1).getCalendar().get(Calendar.MONTH) != item.getCalendar().get(Calendar.MONTH)) {
+            mItems.add(i, new MonthItem(monthCalendar));
+        }
+    }
+
+    private void deleteItems(TreeSet<Integer> selectedItems) {
+        int positionChangedBy = 0;
+        for (Integer i : selectedItems) {
+            int position = i - positionChangedBy;
+            if (mItems.get(position - 1).getType() == MONTH_ITEM_TYPE) {
+                if ((position < mItems.size() - 1 && mItems.get(position + 1).getType() != mItems.get(position).getType())
+                        || position == mItems.size() - 1) {
+                    mItems.remove(position - 1);
+                    mItems.remove(position - 1);
+                    positionChangedBy++;
+                } else {
+                    mItems.remove(position);
+                }
+            } else {
+                mItems.remove(position);
+            }
+            positionChangedBy++;
+        }
+    }
+
+    private void sort() {
+        Collections.sort(mItems, new Comparator<Item>() {
+            @Override
+            public int compare(Item o1, Item o2) {
+                int c = Long.compare(o1.getCalendar().getTimeInMillis() / 60000,
+                        o2.getCalendar().getTimeInMillis() / 60000);
+                if (c == 0)
+                    c = Integer.compare(o1.getType(), o2.getType());
+                return c;
+
+            }
+        });
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        mListener = listener;
+    }
+
+    public interface OnItemClickListener {
+        void onClickItem(int position);
+        void onLongClickItem(int visibility);
     }
 
     class TodoItemViewHolder extends RecyclerView.ViewHolder {
@@ -164,8 +223,8 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mActionMode == null && mClickListener != null) {
-                        listener.onItemClick(getAdapterPosition());
+                    if (mActionMode == null && listener != null) {
+                        listener.onClickItem(getAdapterPosition());
                     } else {
                         deleteCheckBox.setChecked(!deleteCheckBox.isChecked());
                     }
@@ -176,55 +235,48 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    mLongClickListener.onItemLongClick(View.INVISIBLE);
                     if (mActionMode == null) {
-                        mActionMode = ((AppCompatActivity) itemView.getContext()).startSupportActionMode(new ActionMode.Callback() {
+                        mActionMode = ((AppCompatActivity) itemView.getContext()).startSupportActionMode(new android.support.v7.view.ActionMode.Callback() {
                             @Override
-                            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                            public boolean onCreateActionMode(android.support.v7.view.ActionMode mode, Menu menu) {
                                 mode.getMenuInflater().inflate(R.menu.menu_list, menu);
                                 return true;
                             }
 
                             @Override
-                            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                            public boolean onPrepareActionMode(android.support.v7.view.ActionMode mode, Menu menu) {
                                 return false;
                             }
 
                             @Override
-                            public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {
+                            public boolean onActionItemClicked(final android.support.v7.view.ActionMode mode, MenuItem item) {
                                 if (mSelectedItems.size() != 0) {
                                     AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                                     builder.setMessage("Delete " + mSelectedItems.size() + " items?")
                                             .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
-                                                    TodoItems.getInstance().deleteItems(mSelectedItems);
-                                                    notifyDataSetChanged();
+                                                    deleteItems(mSelectedItems);
                                                     mode.finish();
                                                 }
                                             })
-                                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                }
-                                            }).create().show();
+                                            .setNegativeButton("Cancel", null)
+                                            .create().show();
                                 } else {
                                     mode.finish();
                                 }
                                 return true;
-
                             }
 
                             @Override
-                            public void onDestroyActionMode(ActionMode mode) {
+                            public void onDestroyActionMode(android.support.v7.view.ActionMode mode) {
                                 mActionMode = null;
                                 mSelectedItems.clear();
-                                mLongClickListener.onItemLongClick(View.VISIBLE);
-                                notifyDataSetChanged();
+                                mListener.onLongClickItem(View.VISIBLE);
                             }
                         });
                         selectItem(getAdapterPosition(), true);
-                        notifyDataSetChanged();
+                        mListener.onLongClickItem(View.INVISIBLE);
                     }
                     return true;
                 }
@@ -246,15 +298,15 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     class MonthItemViewHolder extends RecyclerView.ViewHolder {
         private final SimpleDateFormat monthFormat = new SimpleDateFormat("MMMM", Locale.getDefault());
 
-        private TextView monthTextView;
+        private TextView mMonthTextView;
 
         MonthItemViewHolder(View itemView) {
             super(itemView);
-            monthTextView = itemView.findViewById(R.id.month_text_view);
+            mMonthTextView = itemView.findViewById(R.id.month_text_view);
         }
 
         void bind(MonthItem item) {
-            monthTextView.setText(monthFormat.format(item.getCalendar().getTimeInMillis()));
+            mMonthTextView.setText(monthFormat.format(item.getCalendar().getTimeInMillis()));
         }
     }
 }
