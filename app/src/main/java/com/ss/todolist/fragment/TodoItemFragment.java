@@ -246,13 +246,11 @@ public class TodoItemFragment extends Fragment {
                 }
                 setFieldsEnabled(isEditable);
             }
-
-            mDateEditText.setText(dateFormat.format(mCalendar.getTime()));
-            mTimeEditText.setText(timeFormat.format(mCalendar.getTime()));
-            mCounterTextView.setText(String.valueOf(mCounter));
-
             break;
         }
+        mDateEditText.setText(dateFormat.format(mCalendar.getTime()));
+        mTimeEditText.setText(timeFormat.format(mCalendar.getTime()));
+        mCounterTextView.setText(String.valueOf(mCounter));
     }
 
     @Override
