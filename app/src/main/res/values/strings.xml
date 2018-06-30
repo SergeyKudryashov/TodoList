@@ -4,4 +4,16 @@
     <string name="action_edit">Edit</string>
     <string name="action_save">Save</string>
     <string name="empty_title_error">Enter a title</string>
+    <string name="title_input_hint">Title*</string>
+    <string name="description_input_hint">Description</string>
+    <string name="date_input_hint">Date</string>
+    <string name="time_input_hint">Time</string>
+    <string name="reminder_check_box_label">Reminder</string>
+    <string name="repeat_check_box_label">Repeat</string>
+    <string name="daily_radio_button_label">Daily</string>
+    <string name="weekly_radio_button_label">Weekly</string>
+    <string name="monthly_radio_button_label">Monthly</string>
+    <string name="priority_label">Priority</string>
+    <string name="dec_button_label">−</string>
+    <string name="inc_button_label">+</string>
 </resources>

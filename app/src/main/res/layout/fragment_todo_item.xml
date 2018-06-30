@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:descendantFocusability="beforeDescendants"
         android:focusableInTouchMode="true"
-        android:padding="20dp">
+        android:padding="@dimen/padding_large">
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/title_input_layout"
@@ -25,7 +25,7 @@
                 android:id="@+id/title_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Title*" />
+                android:hint="@string/title_input_hint" />
 
         </android.support.design.widget.TextInputLayout>
 
@@ -33,7 +33,7 @@
             android:id="@+id/description_input_layout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="@dimen/margin_large"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/title_input_layout">
@@ -43,8 +43,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="top"
-                android:lines="3"
-                android:hint="Description" />
+                android:hint="@string/description_input_hint"
+                android:lines="3" />
 
         </android.support.design.widget.TextInputLayout>
 
@@ -53,7 +53,7 @@
             android:id="@+id/date_input_layout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="@dimen/margin_large"
             app:layout_constraintHorizontal_weight="0.75"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@id/time_input_layout"
@@ -65,7 +65,7 @@
                 android:layout_height="wrap_content"
                 android:clickable="true"
                 android:focusable="true"
-                android:hint="Date" />
+                android:hint="@string/date_input_hint" />
 
         </android.support.design.widget.TextInputLayout>
 
@@ -73,7 +73,7 @@
             android:id="@+id/time_input_layout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="@dimen/margin_large"
             app:layout_constraintHorizontal_weight="0.25"
             app:layout_constraintLeft_toRightOf="@id/date_input_layout"
             app:layout_constraintRight_toRightOf="parent"
@@ -85,7 +85,7 @@
                 android:layout_height="wrap_content"
                 android:clickable="true"
                 android:focusable="true"
-                android:hint="Time" />
+                android:hint="@string/time_input_hint" />
 
         </android.support.design.widget.TextInputLayout>
 
@@ -93,9 +93,9 @@
             android:id="@+id/reminder_check_box"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="Reminder"
-            android:textSize="17sp"
+            android:layout_marginTop="@dimen/margin_large"
+            android:text="@string/reminder_check_box_label"
+            android:textSize="@dimen/reminder_check_box_text_size"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/date_input_layout" />
 
@@ -103,9 +103,9 @@
             android:id="@+id/repeat_check_box"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="Repeat"
-            android:textSize="17sp"
+            android:layout_marginTop="@dimen/margin_medium"
+            android:text="@string/repeat_check_box_label"
+            android:textSize="@dimen/repeat_check_box_text_size"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/reminder_check_box" />
 
@@ -113,30 +113,30 @@
             android:id="@+id/repeat_radio_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="25dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginStart="@dimen/margin_large"
+            android:layout_marginTop="@dimen/margin_small"
             android:visibility="gone"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/repeat_check_box"
-            tools:visibility="gone">
+            tools:visibility="visible">
 
             <RadioButton
                 android:id="@+id/daily"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Daily" />
+                android:text="@string/daily_radio_button_label" />
 
             <RadioButton
                 android:id="@+id/weekly"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Weekly" />
+                android:text="@string/weekly_radio_button_label" />
 
             <RadioButton
                 android:id="@+id/monthly"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Monthly" />
+                android:text="@string/monthly_radio_button_label" />
 
         </RadioGroup>
 
@@ -144,23 +144,17 @@
             android:id="@+id/priority_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="3dp"
-            android:layout_marginTop="30dp"
-            android:text="Priority"
+            android:layout_marginTop="@dimen/margin_large"
+            android:text="@string/priority_label"
             android:textColor="@android:color/black"
-            android:textSize="17sp"
+            android:textSize="@dimen/priority_label_text_size"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toBottomOf="@id/repeat_radio_group" />
 
         <Button
             android:id="@+id/dec_count_button"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="10dp"
-            android:background="@drawable/buttons_selector"
-            android:text="−"
-            android:textColor="@android:color/white"
-            android:textSize="17sp"
+            style="@style/IncDecButtonCustomStyle"
+            android:text="@string/dec_button_label"
             app:layout_constraintBaseline_toBaselineOf="@id/priority_text_view"
             app:layout_constraintLeft_toRightOf="@id/priority_text_view" />
 
@@ -168,21 +162,16 @@
             android:id="@+id/counter_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:textSize="20sp"
+            android:layout_marginStart="@dimen/margin_medium"
+            android:textSize="@dimen/counter_label_text_size"
             app:layout_constraintBaseline_toBaselineOf="@id/priority_text_view"
             app:layout_constraintLeft_toRightOf="@id/dec_count_button"
             tools:text="0" />
 
         <Button
             android:id="@+id/inc_count_button"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="10dp"
-            android:background="@drawable/buttons_selector"
-            android:text="+"
-            android:textColor="@android:color/white"
-            android:textSize="17sp"
+            style="@style/IncDecButtonCustomStyle"
+            android:text="@string/inc_button_label"
             app:layout_constraintBaseline_toBaselineOf="@id/priority_text_view"
             app:layout_constraintLeft_toRightOf="@id/counter_text_view" />
 

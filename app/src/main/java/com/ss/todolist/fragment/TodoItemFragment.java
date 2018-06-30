@@ -40,6 +40,10 @@ public class TodoItemFragment extends Fragment {
     public static final int EDIT_TODO_ITEM_REQUEST_CODE = 2;
     public static final String REQUEST_CODE_ARG = "request_code";
     public static final String POSITION_ARG = "position";
+    public static final String COUNTER_KEY = "counter";
+    public static final String LISTENER_KEY = "listener";
+    public static final String CALENDAR_KEY = "calendar";
+    public static final String IS_EDITABLE_KEY = "isEditable";
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
     private final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
@@ -111,9 +115,9 @@ public class TodoItemFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
-            mCounter = savedInstanceState.getInt("counter");
-            isEditable = savedInstanceState.getBoolean("isEditable");
-            mListener = (OnFragmentInteractionListener) savedInstanceState.getSerializable("listener");
+            mCounter = savedInstanceState.getInt(COUNTER_KEY);
+            isEditable = savedInstanceState.getBoolean(IS_EDITABLE_KEY);
+            mListener = (OnFragmentInteractionListener) savedInstanceState.getSerializable(LISTENER_KEY);
         }
     }
 
@@ -220,7 +224,7 @@ public class TodoItemFragment extends Fragment {
                     mCalendar.set(Calendar.HOUR_OF_DAY, 0);
                     mCalendar.set(Calendar.MINUTE, 0);
                 } else {
-                    mCalendar = (Calendar) savedInstanceState.getSerializable("calendar");
+                    mCalendar = (Calendar) savedInstanceState.getSerializable(CALENDAR_KEY);
                 }
 
                 isEditable = true;
@@ -234,7 +238,7 @@ public class TodoItemFragment extends Fragment {
                     mCalendar = mItem.getCalendar();
                     mCounter = mItem.getPriority();
                 } else {
-                    mCalendar = (Calendar) savedInstanceState.getSerializable("calendar");
+                    mCalendar = (Calendar) savedInstanceState.getSerializable(CALENDAR_KEY);
                 }
 
                 mTitleEditText.setText(mItem.getTitle());
@@ -256,10 +260,10 @@ public class TodoItemFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt("counter", mCounter);
-        outState.putSerializable("calendar", mCalendar);
-        outState.putBoolean("isEditable", isEditable);
-        outState.putSerializable("listener", mListener);
+        outState.putInt(COUNTER_KEY, mCounter);
+        outState.putSerializable(CALENDAR_KEY, mCalendar);
+        outState.putBoolean(IS_EDITABLE_KEY, isEditable);
+        outState.putSerializable(LISTENER_KEY, mListener);
     }
 
     @Override

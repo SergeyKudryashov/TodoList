@@ -1,3 +1,22 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="title_label_text_size">20sp</dimen>
+    <dimen name="description_label_text_size">16sp</dimen>
+    <dimen name="month_label_text_size">14sp</dimen>
+    <dimen name="date_label_text_size">15sp</dimen>
+    <dimen name="priority_label_text_size">17sp</dimen>
+    <dimen name="counter_label_text_size">20sp</dimen>
+    <dimen name="padding_small">5dp</dimen>
+    <dimen name="padding_medium">10dp</dimen>
+    <dimen name="padding_large">20dp</dimen>
+    <dimen name="margin_small">5dp</dimen>
+    <dimen name="margin_medium">10dp</dimen>
+    <dimen name="margin_large">20dp</dimen>
+    <dimen name="reminder_check_box_text_size">17sp</dimen>
+    <dimen name="repeat_check_box_text_size">17sp</dimen>
+    <dimen name="inc_dec_button_text_size">17sp</dimen>
+    <dimen name="int_dec_button_width">36dp</dimen>
+    <dimen name="int_dec_button_height">36dp</dimen>
+    <dimen name="line_view_height">1dp</dimen>
+    <dimen name="button_background_shape_corner_radius">5dp</dimen>
 </resources>
