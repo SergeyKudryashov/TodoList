@@ -27,19 +27,20 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.ss.todolist.R;
-import com.ss.todolist.TodoItems;
+import com.ss.todolist.manager.TodoItems;
 import com.ss.todolist.model.TodoItem;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.UUID;
 
 public class TodoItemFragment extends Fragment {
     public static final int ADD_NEW_TODO_ITEM_REQUEST_CODE = 1;
     public static final int EDIT_TODO_ITEM_REQUEST_CODE = 2;
     public static final String REQUEST_CODE_ARG = "request_code";
-    public static final String POSITION_ARG = "position";
+    public static final String ID_ARG = "id";
     public static final String COUNTER_KEY = "counter";
     public static final String LISTENER_KEY = "listener";
     public static final String CALENDAR_KEY = "calendar";
@@ -64,7 +65,6 @@ public class TodoItemFragment extends Fragment {
     private TextView mPriorityTextView;
 
     private TodoItem mItem;
-    private int mPosition;
 
     private int mCounter = 0;
     private Calendar mCalendar;
@@ -231,8 +231,8 @@ public class TodoItemFragment extends Fragment {
             }
             break;
             case EDIT_TODO_ITEM_REQUEST_CODE: {
-                mPosition = getArguments().getInt(POSITION_ARG);
-                mItem = (TodoItem) TodoItems.getInstance().getItem(mPosition);
+                UUID id = (UUID) getArguments().getSerializable(ID_ARG);
+                mItem = (TodoItem) TodoItems.getInstance(getActivity()).getItem(id);
 
                 if (savedInstanceState == null) {
                     mCalendar = mItem.getCalendar();
@@ -246,7 +246,17 @@ public class TodoItemFragment extends Fragment {
                 mReminderCheckBox.setChecked(mItem.isReminder());
                 mRepeatCheckBox.setChecked(mItem.isRepeat());
                 if (mItem.isRepeat()) {
-                    mRepeatRadioGroup.check(mItem.getRepeatType());
+                    switch (mItem.getRepeatType()) {
+                        case TodoItem.DAILY:
+                            mRepeatRadioGroup.check(R.id.daily);
+                            break;
+                        case TodoItem.WEEKLY:
+                            mRepeatRadioGroup.check(R.id.weekly);
+                            break;
+                        case TodoItem.MONTHLY:
+                            mRepeatRadioGroup.check(R.id.monthly);
+                            break;
+                    }
                 }
                 setFieldsEnabled(isEditable);
             }
@@ -336,7 +346,7 @@ public class TodoItemFragment extends Fragment {
         mItem.setReminder(mReminderCheckBox.isChecked());
         mItem.setRepeat(mRepeatCheckBox.isChecked());
         if (mRepeatCheckBox.isChecked()) {
-            mItem.setRepeatType(mRepeatRadioGroup.getCheckedRadioButtonId());
+            setRepeatType(mRepeatRadioGroup.getCheckedRadioButtonId());
         }
         mItem.setPriority(mCounter);
 
@@ -363,14 +373,33 @@ public class TodoItemFragment extends Fragment {
         mItem.setReminder(mReminderCheckBox.isChecked());
         mItem.setRepeat(mRepeatCheckBox.isChecked());
         if (mRepeatCheckBox.isChecked()) {
-            mItem.setRepeatType(mRepeatRadioGroup.getCheckedRadioButtonId());
+            setRepeatType(mRepeatRadioGroup.getCheckedRadioButtonId());
+        } else {
+            mItem.setRepeatType(0);
         }
         mItem.setPriority(mCounter);
 
         if (mListener == null)
             return;
-        mListener.onEditItem(mPosition, mItem);
+        mListener.onEditItem(mItem);
         getFragmentManager().popBackStack();
+    }
+
+    private void setRepeatType(int repeatType) {
+        switch (repeatType) {
+            case R.id.daily:
+                mItem.setRepeatType(TodoItem.DAILY);
+                break;
+            case R.id.weekly:
+                mItem.setRepeatType(TodoItem.WEEKLY);
+                break;
+            case R.id.monthly:
+                mItem.setRepeatType(TodoItem.MONTHLY);
+                break;
+            default:
+                mItem.setRepeatType(0);
+
+        }
     }
 
     public void setOnInteractionListener(OnFragmentInteractionListener onInteractionListener) {
@@ -379,6 +408,7 @@ public class TodoItemFragment extends Fragment {
 
     public interface OnFragmentInteractionListener extends Serializable {
         void onAddItem(TodoItem item);
-        void onEditItem(int position, TodoItem item);
+
+        void onEditItem(TodoItem item);
     }
 }

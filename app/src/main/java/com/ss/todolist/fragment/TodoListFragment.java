@@ -13,17 +13,19 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ss.todolist.R;
-import com.ss.todolist.TodoItems;
+import com.ss.todolist.manager.TodoItems;
 import com.ss.todolist.adapter.ItemAdapter;
 import com.ss.todolist.model.TodoItem;
 import com.ss.todolist.util.KeyboardUtil;
+
+import java.util.UUID;
 
 public class TodoListFragment extends Fragment {
 
     private ItemAdapter.OnItemClickListener mOnItemSelectedListener = new ItemAdapter.OnItemClickListener() {
         @Override
-        public void onClickItem(int position) {
-            editTodoItem(position);
+        public void onClickItem(UUID id) {
+            editTodoItem(id);
         }
 
         @Override
@@ -72,13 +74,15 @@ public class TodoListFragment extends Fragment {
             actionBar.setDisplayShowHomeEnabled(false);
             actionBar.setDisplayHomeAsUpEnabled(false);
         }
-        if (mItemAdapter != null)
+        if (mItemAdapter != null) {
+            mItemAdapter.setItems(TodoItems.getInstance(getActivity()).getItems());
             mItemAdapter.notifyDataSetChanged();
+        }
 
     }
 
     private void init(View view) {
-        mItemAdapter = new ItemAdapter(getActivity(), TodoItems.getInstance().getItems());
+        mItemAdapter = new ItemAdapter(getActivity(), TodoItems.getInstance(getActivity()).getItems());
         mItemAdapter.setOnItemClickListener(mOnItemSelectedListener);
 
         mFab = view.findViewById(R.id.fab);
@@ -96,10 +100,10 @@ public class TodoListFragment extends Fragment {
         replaceFragment(args, "tag2");
     }
 
-    private void editTodoItem(int position) {
+    private void editTodoItem(UUID id) {
         Bundle args = new Bundle();
         args.putInt(TodoItemFragment.REQUEST_CODE_ARG, TodoItemFragment.EDIT_TODO_ITEM_REQUEST_CODE);
-        args.putInt(TodoItemFragment.POSITION_ARG, position);
+        args.putSerializable(TodoItemFragment.ID_ARG, id);
 
         replaceFragment(args, "tag3");
         setFloatButtonVisibility(View.GONE);
@@ -115,8 +119,8 @@ public class TodoListFragment extends Fragment {
             }
 
             @Override
-            public void onEditItem(int position, TodoItem item) {
-                mItemAdapter.editItem(position, item);
+            public void onEditItem(TodoItem item) {
+                mItemAdapter.editItem(item);
             }
         });
 

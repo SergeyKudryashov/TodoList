@@ -17,6 +17,7 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.ss.todolist.R;
+import com.ss.todolist.manager.TodoItems;
 import com.ss.todolist.model.*;
 
 import java.text.SimpleDateFormat;
@@ -26,8 +27,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.TreeSet;
-
-import static com.ss.todolist.model.MonthItem.MONTH_ITEM_TYPE;
+import java.util.UUID;
 
 public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -41,7 +41,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public ItemAdapter(Context context, List<Item> list) {
         mContext = context;
-        mItems = list;
+        setItems(list);
     }
 
     @NonNull
@@ -95,70 +95,43 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
-    public void addItem(TodoItem item) {
-        mItems.add(item);
+    public void setItems(List<Item> items) {
+        mItems = items;
+        if (items.size() == 0) {
+            return;
+        }
         sort();
-        int i = mItems.indexOf(item);
-        Calendar monthCalendar = Calendar.getInstance();
-        monthCalendar.set(item.getCalendar().get(Calendar.YEAR),
-                item.getCalendar().get(Calendar.MONTH), 1, 0, 0);
-        if (i == 0) {
-            mItems.add(0, new MonthItem(monthCalendar));
-        } else if (mItems.get(i - 1).getCalendar().get(Calendar.MONTH) != item.getCalendar().get(Calendar.MONTH)) {
-            mItems.add(i, new MonthItem(monthCalendar));
+        int i = 1;
+        mItems.add(0, new MonthItem(items.get(0).getCalendar()));
+        while (i < mItems.size()) {
+            if (mItems.get(i - 1).getCalendar().get(Calendar.MONTH) != mItems.get(i).getCalendar().get(Calendar.MONTH)) {
+                mItems.add(i, new MonthItem(items.get(i).getCalendar()));
+                i++;
+            }
+            i++;
         }
     }
 
-    public void editItem(int position, TodoItem item) {
-        if (mItems.get(position - 1).getType() == MONTH_ITEM_TYPE) {
-            if (position < mItems.size() - 1 && mItems.get(position + 1).getType() != mItems.get(position).getType()) {
-                mItems.remove(position - 1);
-            } else if (position == mItems.size() - 1) {
-                mItems.remove(position - 1);
-            }
-        }
-        sort();
-        int i = mItems.indexOf(item);
-        Calendar monthCalendar = Calendar.getInstance();
-        monthCalendar.set(item.getCalendar().get(Calendar.YEAR),
-                item.getCalendar().get(Calendar.MONTH), 1, 0, 0);
-        if (i == 0) {
-            mItems.add(0, new MonthItem(monthCalendar));
-        } else if (mItems.get(i - 1).getCalendar().get(Calendar.MONTH) != item.getCalendar().get(Calendar.MONTH)) {
-            mItems.add(i, new MonthItem(monthCalendar));
-        }
+    public void addItem(TodoItem item) {
+        TodoItems.getInstance(mContext).addItem(item);
+    }
+
+    public void editItem(TodoItem item) {
+        TodoItems.getInstance(mContext).updateItem(item);
     }
 
     private void deleteItems(TreeSet<Integer> selectedItems) {
-        int positionChangedBy = 0;
         for (Integer i : selectedItems) {
-            int position = i - positionChangedBy;
-            if (mItems.get(position - 1).getType() == MONTH_ITEM_TYPE) {
-                if ((position < mItems.size() - 1 && mItems.get(position + 1).getType() != mItems.get(position).getType())
-                        || position == mItems.size() - 1) {
-                    mItems.remove(position - 1);
-                    mItems.remove(position - 1);
-                    positionChangedBy++;
-                } else {
-                    mItems.remove(position);
-                }
-            } else {
-                mItems.remove(position);
-            }
-            positionChangedBy++;
+            TodoItems.getInstance(mContext).deleteItem((TodoItem) mItems.get(i));
         }
+
     }
 
     private void sort() {
         Collections.sort(mItems, new Comparator<Item>() {
             @Override
             public int compare(Item o1, Item o2) {
-                int c = Long.compare(o1.getCalendar().getTimeInMillis() / 60000,
-                        o2.getCalendar().getTimeInMillis() / 60000);
-                if (c == 0)
-                    c = Integer.compare(o1.getType(), o2.getType());
-                return c;
-
+                return Long.compare(o1.getCalendar().getTimeInMillis(), o2.getCalendar().getTimeInMillis());
             }
         });
     }
@@ -168,7 +141,8 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     public interface OnItemClickListener {
-        void onClickItem(int position);
+        void onClickItem(UUID id);
+
         void onLongClickItem(int visibility);
     }
 
@@ -200,11 +174,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (mActionMode != null) {
                 deleteCheckBox.setVisibility(View.VISIBLE);
 
-                if (mSelectedItems.contains(getAdapterPosition())) {
-                    deleteCheckBox.setChecked(true);
-                } else {
-                    deleteCheckBox.setChecked(false);
-                }
+                deleteCheckBox.setChecked(mSelectedItems.contains(getAdapterPosition()));
             } else {
                 deleteCheckBox.setChecked(false);
                 deleteCheckBox.setVisibility(View.GONE);
@@ -224,7 +194,8 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 @Override
                 public void onClick(View v) {
                     if (mActionMode == null && listener != null) {
-                        listener.onClickItem(getAdapterPosition());
+                        TodoItem item = (TodoItem) mItems.get(getAdapterPosition());
+                        listener.onClickItem(item.getId());
                     } else {
                         deleteCheckBox.setChecked(!deleteCheckBox.isChecked());
                     }
@@ -257,6 +228,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     deleteItems(mSelectedItems);
+                                                    setItems(TodoItems.getInstance(mContext).getItems());
                                                     mode.finish();
                                                 }
                                             })

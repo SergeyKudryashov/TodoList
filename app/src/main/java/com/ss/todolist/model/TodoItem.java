@@ -8,6 +8,9 @@ public class TodoItem implements Serializable, Item {
     public static final int TODO_ITEM_TYPE = 1;
     public static final int PRIORITY_MAX = 3;
     public static final int PRIORITY_MIN = 0;
+    public static final int DAILY = 1;
+    public static final int WEEKLY = 2;
+    public static final int MONTHLY = 3;
 
     private UUID mId;
     private String mTitle;
@@ -19,7 +22,11 @@ public class TodoItem implements Serializable, Item {
     private int mPriority;
 
     public TodoItem() {
-        mId = UUID.randomUUID();
+        this(UUID.randomUUID());
+    }
+
+    public TodoItem(UUID id) {
+        mId = id;
     }
 
     public UUID getId() {
@@ -119,7 +126,7 @@ public class TodoItem implements Serializable, Item {
 
     @Override
     public String toString() {
-        return  "[" + mId + "]:"
+        return "[" + mId + "]:"
                 + mTitle + "|"
                 + mDescription + "|"
                 + mCalendar + "|"
