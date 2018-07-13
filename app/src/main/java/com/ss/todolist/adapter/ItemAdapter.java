@@ -17,10 +17,11 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.ss.todolist.R;
-import com.ss.todolist.manager.TodoItems;
+import com.ss.todolist.db.DatabaseManager;
 import com.ss.todolist.model.*;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,9 +40,9 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<Item> mItems;
     private TreeSet<Integer> mSelectedItems = new TreeSet<>();
 
-    public ItemAdapter(Context context, List<Item> list) {
+    public ItemAdapter(Context context) {
         mContext = context;
-        setItems(list);
+        mItems = new ArrayList<>();
     }
 
     @NonNull
@@ -113,16 +114,16 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     public void addItem(TodoItem item) {
-        TodoItems.getInstance(mContext).addItem(item);
+        DatabaseManager.getInstance(mContext).addItem(item);
     }
 
     public void editItem(TodoItem item) {
-        TodoItems.getInstance(mContext).updateItem(item);
+        DatabaseManager.getInstance(mContext).updateItem(item);
     }
 
     private void deleteItems(TreeSet<Integer> selectedItems) {
         for (Integer i : selectedItems) {
-            TodoItems.getInstance(mContext).deleteItem((TodoItem) mItems.get(i));
+            DatabaseManager.getInstance(mContext).deleteItem((TodoItem) mItems.get(i));
         }
 
     }
@@ -228,7 +229,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     deleteItems(mSelectedItems);
-                                                    setItems(TodoItems.getInstance(mContext).getItems());
+                                                    setItems(DatabaseManager.getInstance(mContext).getItems());
                                                     mode.finish();
                                                 }
                                             })

@@ -20,6 +20,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:authorities="com.ss.todolist.provider"
+            android:name=".provider.TodoContentProvider"
+            android:exported="true" />
     </application>
 
 </manifest>

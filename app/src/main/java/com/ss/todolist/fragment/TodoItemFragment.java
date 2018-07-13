@@ -27,7 +27,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.ss.todolist.R;
-import com.ss.todolist.manager.TodoItems;
+import com.ss.todolist.db.DatabaseManager;
 import com.ss.todolist.model.TodoItem;
 
 import java.io.Serializable;
@@ -232,7 +232,7 @@ public class TodoItemFragment extends Fragment {
             break;
             case EDIT_TODO_ITEM_REQUEST_CODE: {
                 UUID id = (UUID) getArguments().getSerializable(ID_ARG);
-                mItem = (TodoItem) TodoItems.getInstance(getActivity()).getItem(id);
+                mItem = (TodoItem) DatabaseManager.getInstance(getActivity()).getItem(id);
 
                 if (savedInstanceState == null) {
                     mCalendar = mItem.getCalendar();

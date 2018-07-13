@@ -27,6 +27,9 @@ public class TodoItem implements Serializable, Item {
 
     public TodoItem(UUID id) {
         mId = id;
+        mCalendar = Calendar.getInstance();
+            mTitle = "";
+            mDescription = "";
     }
 
     public UUID getId() {

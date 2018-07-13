@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ss.todolist.R;
-import com.ss.todolist.manager.TodoItems;
+import com.ss.todolist.db.DatabaseManager;
 import com.ss.todolist.adapter.ItemAdapter;
 import com.ss.todolist.model.TodoItem;
 import com.ss.todolist.util.KeyboardUtil;
@@ -75,14 +75,15 @@ public class TodoListFragment extends Fragment {
             actionBar.setDisplayHomeAsUpEnabled(false);
         }
         if (mItemAdapter != null) {
-            mItemAdapter.setItems(TodoItems.getInstance(getActivity()).getItems());
+            mItemAdapter.setItems(DatabaseManager.getInstance(getActivity()).getItems());
             mItemAdapter.notifyDataSetChanged();
         }
 
     }
 
     private void init(View view) {
-        mItemAdapter = new ItemAdapter(getActivity(), TodoItems.getInstance(getActivity()).getItems());
+        mItemAdapter = new ItemAdapter(getActivity());
+        mItemAdapter.setItems(DatabaseManager.getInstance(getActivity()).getItems());
         mItemAdapter.setOnItemClickListener(mOnItemSelectedListener);
 
         mFab = view.findViewById(R.id.fab);

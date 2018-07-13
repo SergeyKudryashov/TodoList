@@ -1,12 +1,10 @@
-package com.ss.todolist.manager;
+package com.ss.todolist.db;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.ss.todolist.db.DbHelper;
-import com.ss.todolist.db.TodoCursorWrapper;
 import com.ss.todolist.db.TodoDbContract.TodoEntry;
 import com.ss.todolist.model.Item;
 import com.ss.todolist.model.TodoItem;
@@ -15,20 +13,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class TodoItems {
+public class DatabaseManager {
 
-    private static TodoItems mInstance;
+    private static DatabaseManager mInstance;
 
     private SQLiteDatabase mDatabase;
 
-    public static TodoItems getInstance(Context context) {
+    public static DatabaseManager getInstance(Context context) {
         if (mInstance == null) {
-            mInstance = new TodoItems(context);
+            mInstance = new DatabaseManager(context);
         }
         return mInstance;
     }
 
-    private TodoItems(Context context) {
+    private DatabaseManager(Context context) {
         mDatabase = new DbHelper(context.getApplicationContext())
                 .getWritableDatabase();
     }
