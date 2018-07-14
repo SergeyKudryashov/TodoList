@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CounterView">
+        <attr name="setMaxValue" format="integer"/>
+        <attr name="setText" format="string"/>
+        <attr name="setBackground" format="integer"/>
+    </declare-styleable>
+</resources>
