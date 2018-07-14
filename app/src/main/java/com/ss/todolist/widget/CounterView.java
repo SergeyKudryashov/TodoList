@@ -66,11 +66,11 @@ public class CounterView extends FrameLayout {
 
     private void init(@Nullable AttributeSet attrs) {
         if (attrs != null) {
-            TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.PriorityView);
-            if (!TextUtils.isEmpty(ta.getString(R.styleable.PriorityView_setText)))
-                mText = ta.getString(R.styleable.PriorityView_setText);
-            mCounterMaxValue = ta.getInteger(R.styleable.PriorityView_setMaxValue, mCounterMaxValue);
-            mBackgroundResId = ta.getResourceId(R.styleable.PriorityView_setBackground, -1);
+            TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.CounterView);
+            if (!TextUtils.isEmpty(ta.getString(R.styleable.CounterView_setText)))
+                mText = ta.getString(R.styleable.CounterView_setText);
+            mCounterMaxValue = ta.getInteger(R.styleable.CounterView_setMaxValue, mCounterMaxValue);
+            mBackgroundResId = ta.getResourceId(R.styleable.CounterView_setBackground, -1);
             ta.recycle();
         }
 
