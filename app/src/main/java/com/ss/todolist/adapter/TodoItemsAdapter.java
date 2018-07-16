@@ -30,7 +30,7 @@ import java.util.Locale;
 import java.util.TreeSet;
 import java.util.UUID;
 
-public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class TodoItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private OnItemClickListener mListener;
 
@@ -40,7 +40,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<Item> mItems;
     private TreeSet<Integer> mSelectedItems = new TreeSet<>();
 
-    public ItemAdapter(Context context) {
+    public TodoItemsAdapter(Context context) {
         mContext = context;
         mItems = new ArrayList<>();
     }
@@ -98,6 +98,7 @@ public class ItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public void setItems(List<Item> items) {
         mItems = items;
+        mItems.clear();
         if (items.size() == 0) {
             return;
         }

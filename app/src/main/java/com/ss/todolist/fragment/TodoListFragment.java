@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 
 import com.ss.todolist.R;
 import com.ss.todolist.db.DatabaseManager;
-import com.ss.todolist.adapter.ItemAdapter;
+import com.ss.todolist.adapter.TodoItemsAdapter;
 import com.ss.todolist.model.TodoItem;
 import com.ss.todolist.util.KeyboardUtil;
 
@@ -22,7 +22,7 @@ import java.util.UUID;
 
 public class TodoListFragment extends Fragment {
 
-    private ItemAdapter.OnItemClickListener mOnItemSelectedListener = new ItemAdapter.OnItemClickListener() {
+    private TodoItemsAdapter.OnItemClickListener mOnItemSelectedListener = new TodoItemsAdapter.OnItemClickListener() {
         @Override
         public void onClickItem(UUID id) {
             editTodoItem(id);
@@ -31,7 +31,7 @@ public class TodoListFragment extends Fragment {
         @Override
         public void onLongClickItem(int visibility) {
             setFloatButtonVisibility(visibility);
-            mItemAdapter.notifyDataSetChanged();
+            mTodoItemsAdapter.notifyDataSetChanged();
         }
     };
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
@@ -45,7 +45,7 @@ public class TodoListFragment extends Fragment {
         }
     };
 
-    private ItemAdapter mItemAdapter;
+    private TodoItemsAdapter mTodoItemsAdapter;
     private FloatingActionButton mFab;
 
     public TodoListFragment() {
@@ -74,24 +74,24 @@ public class TodoListFragment extends Fragment {
             actionBar.setDisplayShowHomeEnabled(false);
             actionBar.setDisplayHomeAsUpEnabled(false);
         }
-        if (mItemAdapter != null) {
-            mItemAdapter.setItems(DatabaseManager.getInstance(getActivity()).getItems());
-            mItemAdapter.notifyDataSetChanged();
+        if (mTodoItemsAdapter != null) {
+            mTodoItemsAdapter.setItems(DatabaseManager.getInstance(getActivity()).getItems());
+            mTodoItemsAdapter.notifyDataSetChanged();
         }
 
     }
 
     private void init(View view) {
-        mItemAdapter = new ItemAdapter(getActivity());
-        mItemAdapter.setItems(DatabaseManager.getInstance(getActivity()).getItems());
-        mItemAdapter.setOnItemClickListener(mOnItemSelectedListener);
+        mTodoItemsAdapter = new TodoItemsAdapter(getActivity());
+        mTodoItemsAdapter.setItems(DatabaseManager.getInstance(getActivity()).getItems());
+        mTodoItemsAdapter.setOnItemClickListener(mOnItemSelectedListener);
 
         mFab = view.findViewById(R.id.fab);
         mFab.setOnClickListener(mOnClickListener);
 
         RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setAdapter(mItemAdapter);
+        recyclerView.setAdapter(mTodoItemsAdapter);
     }
 
     private void addTodoItem() {
@@ -116,12 +116,12 @@ public class TodoListFragment extends Fragment {
         todoItemFragment.setOnInteractionListener(new TodoItemFragment.OnFragmentInteractionListener() {
             @Override
             public void onAddItem(TodoItem item) {
-                mItemAdapter.addItem(item);
+                mTodoItemsAdapter.addItem(item);
             }
 
             @Override
             public void onEditItem(TodoItem item) {
-                mItemAdapter.editItem(item);
+                mTodoItemsAdapter.editItem(item);
             }
         });
 
