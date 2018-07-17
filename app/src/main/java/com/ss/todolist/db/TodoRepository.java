@@ -38,7 +38,7 @@ public class TodoRepository {
         new updateAsyncTask(mTodoDao).execute(item);
     }
 
-    public  void delete(UUID id) {
+    public  void delete(UUID... id) {
         new deleteAsyncTask(mTodoDao).execute(id);
     }
 

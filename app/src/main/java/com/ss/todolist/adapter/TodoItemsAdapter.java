@@ -17,14 +17,12 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.ss.todolist.R;
-import com.ss.todolist.db.DatabaseManager;
+import com.ss.todolist.db.entity.Todo;
 import com.ss.todolist.model.*;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.TreeSet;
@@ -55,7 +53,7 @@ public class TodoItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 return new MonthItemViewHolder(view);
 
             }
-            case TodoItem.TODO_ITEM_TYPE: {
+            case Todo.TODO_ITEM_TYPE: {
                 view = LayoutInflater.from(mContext).inflate(R.layout.todo_item, parent, false);
                 return new TodoItemViewHolder(view);
             }
@@ -68,8 +66,8 @@ public class TodoItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         switch (holder.getItemViewType()) {
-            case TodoItem.TODO_ITEM_TYPE: {
-                ((TodoItemViewHolder) holder).bind((TodoItem) mItems.get(position), mListener);
+            case Todo.TODO_ITEM_TYPE: {
+                ((TodoItemViewHolder) holder).bind((Todo) mItems.get(position));
             }
             break;
             case MonthItem.MONTH_ITEM_TYPE: {
@@ -89,53 +87,33 @@ public class TodoItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         switch (mItems.get(position).getType()) {
             case MonthItem.MONTH_ITEM_TYPE:
                 return MonthItem.MONTH_ITEM_TYPE;
-            case TodoItem.TODO_ITEM_TYPE:
-                return TodoItem.TODO_ITEM_TYPE;
+            case Todo.TODO_ITEM_TYPE:
+                return Todo.TODO_ITEM_TYPE;
             default:
                 return -1;
         }
     }
 
-    public void setItems(List<Item> items) {
-        mItems = items;
+    public void setItems(List<Todo> items) {
         mItems.clear();
+        mItems.addAll(items);
         if (items.size() == 0) {
             return;
         }
-        sort();
+        addMonthItems();
+        notifyDataSetChanged();
+    }
+
+    private void addMonthItems() {
         int i = 1;
-        mItems.add(0, new MonthItem(items.get(0).getCalendar()));
+        mItems.add(0, new MonthItem(mItems.get(0).getCalendar()));
         while (i < mItems.size()) {
             if (mItems.get(i - 1).getCalendar().get(Calendar.MONTH) != mItems.get(i).getCalendar().get(Calendar.MONTH)) {
-                mItems.add(i, new MonthItem(items.get(i).getCalendar()));
+                mItems.add(i, new MonthItem(mItems.get(i).getCalendar()));
                 i++;
             }
             i++;
         }
-    }
-
-    public void addItem(TodoItem item) {
-        DatabaseManager.getInstance(mContext).addItem(item);
-    }
-
-    public void editItem(TodoItem item) {
-        DatabaseManager.getInstance(mContext).updateItem(item);
-    }
-
-    private void deleteItems(TreeSet<Integer> selectedItems) {
-        for (Integer i : selectedItems) {
-            DatabaseManager.getInstance(mContext).deleteItem((TodoItem) mItems.get(i));
-        }
-
-    }
-
-    private void sort() {
-        Collections.sort(mItems, new Comparator<Item>() {
-            @Override
-            public int compare(Item o1, Item o2) {
-                return Long.compare(o1.getCalendar().getTimeInMillis(), o2.getCalendar().getTimeInMillis());
-            }
-        });
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -143,9 +121,9 @@ public class TodoItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     }
 
     public interface OnItemClickListener {
-        void onClickItem(UUID id);
-
+        void onClickItem(Todo item);
         void onLongClickItem(int visibility);
+        void onDeleteClick(UUID id);
     }
 
     class TodoItemViewHolder extends RecyclerView.ViewHolder {
@@ -163,7 +141,7 @@ public class TodoItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         }
 
-        void bind(final TodoItem item, final OnItemClickListener listener) {
+        void bind(final Todo item) {
             titleTextView.setText(item.getTitle());
             if (item.getDescription().isEmpty()) {
                 descriptionTextView.setVisibility(View.GONE);
@@ -195,9 +173,8 @@ public class TodoItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mActionMode == null && listener != null) {
-                        TodoItem item = (TodoItem) mItems.get(getAdapterPosition());
-                        listener.onClickItem(item.getId());
+                    if (mActionMode == null && mListener != null) {
+                        mListener.onClickItem((Todo) mItems.get(getAdapterPosition()));
                     } else {
                         deleteCheckBox.setChecked(!deleteCheckBox.isChecked());
                     }
@@ -229,8 +206,11 @@ public class TodoItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                                             .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
-                                                    deleteItems(mSelectedItems);
-                                                    setItems(DatabaseManager.getInstance(mContext).getItems());
+                                                    if (mListener != null) {
+                                                        for (Integer i : mSelectedItems) {
+                                                            mListener.onDeleteClick(((Todo) mItems.get(i)).getId());
+                                                        }
+                                                    }
                                                     mode.finish();
                                                 }
                                             })
@@ -266,7 +246,6 @@ public class TodoItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             if (mActionMode != null)
                 mActionMode.setTitle(String.valueOf(mSelectedItems.size()) + " selected");
         }
-
     }
 
     class MonthItemViewHolder extends RecyclerView.ViewHolder {

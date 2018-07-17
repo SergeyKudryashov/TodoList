@@ -1,6 +1,6 @@
 package com.ss.todolist.activity;
 
-import android.app.FragmentManager;
+import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -21,7 +21,8 @@ public class MainActivity extends AppCompatActivity {
         final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mFragmentManager = getFragmentManager();
+        mFragmentManager = getSupportFragmentManager();
+
         TodoListFragment todoListFragment;
         if (mFragmentManager.findFragmentById(R.id.fragment_container) == null) {
             todoListFragment = new TodoListFragment();

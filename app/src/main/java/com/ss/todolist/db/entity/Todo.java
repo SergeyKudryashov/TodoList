@@ -29,7 +29,7 @@ public class Todo implements Serializable, Item {
     public static final int MONTHLY = 3;
 
     @PrimaryKey
-    @ColumnInfo(name = "_id", typeAffinity = ColumnInfo.TEXT)
+    @ColumnInfo(name = "_id")
     @NonNull
     private UUID mId;
 
@@ -56,20 +56,16 @@ public class Todo implements Serializable, Item {
     private int mPriority;
 
     public Todo() {
-        this(UUID.randomUUID());
-    }
-
-    @Ignore
-    public Todo(@NonNull UUID id) {
-        mId = id;
-        mCalendar = Calendar.getInstance();
-            mTitle = "";
-            mDescription = "";
+        setId(UUID.randomUUID());
     }
 
     @NonNull
     public UUID getId() {
         return mId;
+    }
+
+    public void setId(@NonNull UUID id) {
+        mId = id;
     }
 
     @NonNull

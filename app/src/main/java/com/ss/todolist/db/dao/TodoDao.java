@@ -30,8 +30,8 @@ public interface TodoDao {
     @Update(onConflict = OnConflictStrategy.REPLACE)
     void update(Todo item);
 
-    @Query("DELETE FROM todo_items WHERE _id = :id")
-    void delete(UUID id);
+    @Query("DELETE FROM todo_items WHERE _id in (:id)")
+    void delete(UUID... id);
 
     @Query("DELETE FROM todo_items")
     void deleteAll();

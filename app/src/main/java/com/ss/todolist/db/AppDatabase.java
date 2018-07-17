@@ -3,12 +3,16 @@ package com.ss.todolist.db;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
+import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
 
 import com.ss.todolist.db.dao.TodoDao;
 import com.ss.todolist.db.entity.Todo;
+import com.ss.todolist.db.utils.CalendarTypeConverter;
+import com.ss.todolist.db.utils.UUIDTypeConverter;
 
 @Database(entities = {Todo.class}, version = 1)
+@TypeConverters(value = {CalendarTypeConverter.class, UUIDTypeConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
     private static final String DATABASE_NAME = "todo.db";

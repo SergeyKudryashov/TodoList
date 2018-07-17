@@ -2,7 +2,8 @@ package com.ss.todolist.fragment;
 
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
-import android.app.Fragment;
+import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -27,20 +28,21 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.ss.todolist.R;
-import com.ss.todolist.db.DatabaseManager;
-import com.ss.todolist.model.TodoItem;
+import com.ss.todolist.db.entity.Todo;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
-import java.util.UUID;
 
 public class TodoItemFragment extends Fragment {
+
     public static final int ADD_NEW_TODO_ITEM_REQUEST_CODE = 1;
     public static final int EDIT_TODO_ITEM_REQUEST_CODE = 2;
+
     public static final String REQUEST_CODE_ARG = "request_code";
-    public static final String ID_ARG = "id";
+    public static final String TODO_ARG = "id";
+
     public static final String COUNTER_KEY = "counter";
     public static final String LISTENER_KEY = "listener";
     public static final String CALENDAR_KEY = "calendar";
@@ -64,7 +66,7 @@ public class TodoItemFragment extends Fragment {
     private TextView mCounterTextView;
     private TextView mPriorityTextView;
 
-    private TodoItem mItem;
+    private Todo mItem;
 
     private int mCounter = 0;
     private Calendar mCalendar;
@@ -96,11 +98,11 @@ public class TodoItemFragment extends Fragment {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.inc_count_button:
-                    mCounter = Math.min(++mCounter, TodoItem.PRIORITY_MAX);
+                    mCounter = Math.min(++mCounter, Todo.PRIORITY_MAX);
                     mCounterTextView.setText(String.valueOf(mCounter));
                     break;
                 case R.id.dec_count_button:
-                    mCounter = Math.max(--mCounter, TodoItem.PRIORITY_MIN);
+                    mCounter = Math.max(--mCounter, Todo.PRIORITY_MIN);
                     mCounterTextView.setText(String.valueOf(mCounter));
                     break;
             }
@@ -135,12 +137,12 @@ public class TodoItemFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_todo_item, container, false);
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         init(view);
         update(savedInstanceState);
     }
@@ -216,7 +218,7 @@ public class TodoItemFragment extends Fragment {
     private void update(Bundle savedInstanceState) {
         switch (getArguments().getInt(REQUEST_CODE_ARG)) {
             case ADD_NEW_TODO_ITEM_REQUEST_CODE: {
-                mItem = new TodoItem();
+                mItem = new Todo();
 
                 if (savedInstanceState == null) {
                     mCalendar = Calendar.getInstance();
@@ -231,8 +233,7 @@ public class TodoItemFragment extends Fragment {
             }
             break;
             case EDIT_TODO_ITEM_REQUEST_CODE: {
-                UUID id = (UUID) getArguments().getSerializable(ID_ARG);
-                mItem = (TodoItem) DatabaseManager.getInstance(getActivity()).getItem(id);
+                mItem = (Todo) getArguments().getSerializable(TODO_ARG);
 
                 if (savedInstanceState == null) {
                     mCalendar = mItem.getCalendar();
@@ -247,13 +248,13 @@ public class TodoItemFragment extends Fragment {
                 mRepeatCheckBox.setChecked(mItem.isRepeat());
                 if (mItem.isRepeat()) {
                     switch (mItem.getRepeatType()) {
-                        case TodoItem.DAILY:
+                        case Todo.DAILY:
                             mRepeatRadioGroup.check(R.id.daily);
                             break;
-                        case TodoItem.WEEKLY:
+                        case Todo.WEEKLY:
                             mRepeatRadioGroup.check(R.id.weekly);
                             break;
-                        case TodoItem.MONTHLY:
+                        case Todo.MONTHLY:
                             mRepeatRadioGroup.check(R.id.monthly);
                             break;
                     }
@@ -268,7 +269,7 @@ public class TodoItemFragment extends Fragment {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(COUNTER_KEY, mCounter);
         outState.putSerializable(CALENDAR_KEY, mCalendar);
@@ -388,13 +389,13 @@ public class TodoItemFragment extends Fragment {
     private void setRepeatType(int repeatType) {
         switch (repeatType) {
             case R.id.daily:
-                mItem.setRepeatType(TodoItem.DAILY);
+                mItem.setRepeatType(Todo.DAILY);
                 break;
             case R.id.weekly:
-                mItem.setRepeatType(TodoItem.WEEKLY);
+                mItem.setRepeatType(Todo.WEEKLY);
                 break;
             case R.id.monthly:
-                mItem.setRepeatType(TodoItem.MONTHLY);
+                mItem.setRepeatType(Todo.MONTHLY);
                 break;
             default:
                 mItem.setRepeatType(0);
@@ -407,8 +408,7 @@ public class TodoItemFragment extends Fragment {
     }
 
     public interface OnFragmentInteractionListener extends Serializable {
-        void onAddItem(TodoItem item);
-
-        void onEditItem(TodoItem item);
+        void onAddItem(Todo item);
+        void onEditItem(Todo item);
     }
 }
