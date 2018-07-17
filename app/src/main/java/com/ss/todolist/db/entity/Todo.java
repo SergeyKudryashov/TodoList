@@ -15,17 +15,13 @@ import java.util.UUID;
 @Entity(tableName = "todo_items")
 public class Todo implements Serializable, Item {
 
-    @Ignore
     public static final int TODO_ITEM_TYPE = 1;
-    @Ignore
+
     public static final int PRIORITY_MAX = 3;
-    @Ignore
     public static final int PRIORITY_MIN = 0;
-    @Ignore
+
     public static final int DAILY = 1;
-    @Ignore
     public static final int WEEKLY = 2;
-    @Ignore
     public static final int MONTHLY = 3;
 
     @PrimaryKey
@@ -130,13 +126,11 @@ public class Todo implements Serializable, Item {
         mPriority = priority;
     }
 
-    @Ignore
     @Override
     public int getType() {
         return TODO_ITEM_TYPE;
     }
 
-    @Ignore
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -146,7 +140,6 @@ public class Todo implements Serializable, Item {
         return result;
     }
 
-    @Ignore
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -163,7 +156,6 @@ public class Todo implements Serializable, Item {
         }
     }
 
-    @Ignore
     @Override
     public String toString() {
         return "[" + mId + "]:"

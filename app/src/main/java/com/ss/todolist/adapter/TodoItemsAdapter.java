@@ -97,14 +97,14 @@ public class TodoItemsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     public void setItems(List<Todo> items) {
         mItems.clear();
         mItems.addAll(items);
-        if (items.size() == 0) {
-            return;
-        }
         addMonthItems();
         notifyDataSetChanged();
     }
 
     private void addMonthItems() {
+        if (mItems.size() == 0) {
+            return;
+        }
         int i = 1;
         mItems.add(0, new MonthItem(mItems.get(0).getCalendar()));
         while (i < mItems.size()) {

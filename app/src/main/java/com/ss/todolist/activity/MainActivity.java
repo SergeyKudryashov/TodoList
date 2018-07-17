@@ -23,9 +23,9 @@ public class MainActivity extends AppCompatActivity {
 
         mFragmentManager = getSupportFragmentManager();
 
-        TodoListFragment todoListFragment;
         if (mFragmentManager.findFragmentById(R.id.fragment_container) == null) {
-            todoListFragment = new TodoListFragment();
+            TodoListFragment todoListFragment = new TodoListFragment();
+
             mFragmentManager.beginTransaction()
                     .add(R.id.fragment_container, todoListFragment, "tag1")
                     .commit();

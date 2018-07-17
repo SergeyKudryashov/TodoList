@@ -8,8 +8,8 @@ import android.content.Context;
 
 import com.ss.todolist.db.dao.TodoDao;
 import com.ss.todolist.db.entity.Todo;
-import com.ss.todolist.db.utils.CalendarTypeConverter;
-import com.ss.todolist.db.utils.UUIDTypeConverter;
+import com.ss.todolist.db.converter.CalendarTypeConverter;
+import com.ss.todolist.db.converter.UUIDTypeConverter;
 
 @Database(entities = {Todo.class}, version = 1)
 @TypeConverters(value = {CalendarTypeConverter.class, UUIDTypeConverter.class})
@@ -24,7 +24,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public static AppDatabase getInstance(Context context) {
         synchronized (AppDatabase.class) {
             if (sInstance == null) {
-                sInstance = Room.databaseBuilder(context, AppDatabase.class, DATABASE_NAME)
+                sInstance = Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, DATABASE_NAME)
                         .build();
             }
         }

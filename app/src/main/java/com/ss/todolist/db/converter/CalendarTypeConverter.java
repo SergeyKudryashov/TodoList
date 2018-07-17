@@ -1,4 +1,4 @@
-package com.ss.todolist.db.utils;
+package com.ss.todolist.db.converter;
 
 import android.arch.persistence.room.TypeConverter;
 

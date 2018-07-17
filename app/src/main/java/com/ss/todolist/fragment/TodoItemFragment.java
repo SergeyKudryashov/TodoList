@@ -147,7 +147,6 @@ public class TodoItemFragment extends Fragment {
         update(savedInstanceState);
     }
 
-
     @SuppressLint("ClickableViewAccessibility")
     private void init(View view) {
         mTitleInputLayout = view.findViewById(R.id.title_input_layout);

@@ -21,10 +21,10 @@
             </intent-filter>
         </activity>
 
-        <!--<provider-->
-            <!--android:authorities="com.ss.todolist.provider"-->
-            <!--android:name=".provider.TodoContentProvider"-->
-            <!--android:exported="true" />-->
+        <provider
+            android:authorities="com.ss.todolist.provider"
+            android:name=".provider.TodoContentProvider"
+            android:exported="true" />
     </application>
 
 </manifest>
